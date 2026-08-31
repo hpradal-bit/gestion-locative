@@ -4,6 +4,8 @@ import { Plus, Receipt } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { DataTable, type DataTableColumn } from "@/components/shared/data-table";
+import { Pagination } from "@/components/shared/pagination";
+import { paginate, parsePageParam } from "@/lib/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExpenseFilters } from "@/features/expenses/expense-filters";
@@ -34,10 +36,14 @@ export default async function DepensesPage({
     ? (categoryParam as ExpenseCategory)
     : undefined;
 
-  const [expenses, properties] = await Promise.all([
+  const [allExpenses, properties] = await Promise.all([
     listExpenses({ propertyId, category }),
     listProperties(),
   ]);
+  const { items: expenses, currentPage, pageCount, totalCount } = paginate(
+    allExpenses,
+    parsePageParam(params.page)
+  );
 
   const columns: DataTableColumn<ExpenseRow>[] = [
     {
@@ -94,12 +100,21 @@ export default async function DepensesPage({
       ) : (
         <>
           <ExpenseFilters properties={properties} />
-          <DataTable
-            columns={columns}
-            rows={expenses}
-            rowKey={(row) => row.id}
-            emptyMessage="Aucune dépense ne correspond à ces filtres."
-          />
+          <div>
+            <DataTable
+              columns={columns}
+              rows={expenses}
+              rowKey={(row) => row.id}
+              emptyMessage="Aucune dépense ne correspond à ces filtres."
+            />
+            <Pagination
+              currentPage={currentPage}
+              pageCount={pageCount}
+              totalCount={totalCount}
+              basePath="/depenses"
+              searchParams={{ bien: propertyId, categorie: categoryParam }}
+            />
+          </div>
         </>
       )}
     </div>

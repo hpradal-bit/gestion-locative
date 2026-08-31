@@ -76,7 +76,12 @@ export async function DocumentsSection({
                   <DownloadButton storagePath={doc.storage_path} />
                   <ConfirmDialog
                     trigger={
-                      <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-destructive hover:text-destructive"
+                        aria-label="Supprimer"
+                      >
                         <Trash2 />
                       </Button>
                     }

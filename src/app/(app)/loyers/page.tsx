@@ -3,7 +3,9 @@ import { FileText, Wallet } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { DataTable, type DataTableColumn } from "@/components/shared/data-table";
+import { Pagination } from "@/components/shared/pagination";
 import { RentStatusBadge } from "@/components/shared/rent-status-badge";
+import { paginate, parsePageParam } from "@/lib/pagination";
 import { Button } from "@/components/ui/button";
 import { PaymentDialog } from "@/features/payments/payment-dialog";
 import { RentFilters } from "@/features/rent-schedules/rent-filters";
@@ -33,12 +35,16 @@ export default async function LoyersPage({
     ? (statusParam as RentScheduleStatus)
     : undefined;
 
-  const [schedules, properties] = await Promise.all([
+  const [allSchedules, properties] = await Promise.all([
     listRentSchedules({ propertyId, status }),
     listProperties(),
   ]);
 
   const hasProperties = properties.length > 0;
+  const { items: schedules, currentPage, pageCount, totalCount } = paginate(
+    allSchedules,
+    parsePageParam(params.page)
+  );
 
   const columns: DataTableColumn<RentScheduleWithDetails>[] = [
     {
@@ -111,12 +117,21 @@ export default async function LoyersPage({
       ) : (
         <>
           <RentFilters properties={properties} />
-          <DataTable
-            columns={columns}
-            rows={schedules}
-            rowKey={(row) => row.id}
-            emptyMessage="Aucune échéance ne correspond à ces filtres."
-          />
+          <div>
+            <DataTable
+              columns={columns}
+              rows={schedules}
+              rowKey={(row) => row.id}
+              emptyMessage="Aucune échéance ne correspond à ces filtres."
+            />
+            <Pagination
+              currentPage={currentPage}
+              pageCount={pageCount}
+              totalCount={totalCount}
+              basePath="/loyers"
+              searchParams={{ bien: propertyId, statut: statusParam }}
+            />
+          </div>
         </>
       )}
     </div>

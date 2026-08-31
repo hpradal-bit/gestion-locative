@@ -3,6 +3,8 @@ import { FolderOpen, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { DataTable, type DataTableColumn } from "@/components/shared/data-table";
+import { Pagination } from "@/components/shared/pagination";
+import { paginate, parsePageParam } from "@/lib/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
@@ -31,10 +33,14 @@ export default async function DocumentsPage({
   const entityType = typeof params.type === "string" ? params.type : undefined;
   const search = typeof params.q === "string" ? params.q : undefined;
 
-  const documents = await listDocuments({
+  const allDocuments = await listDocuments({
     entityType: entityType as (typeof documentEntityTypes)[number] | undefined,
     search,
   });
+  const { items: documents, currentPage, pageCount, totalCount } = paginate(
+    allDocuments,
+    parsePageParam(params.page)
+  );
 
   const columns: DataTableColumn<DocumentRow>[] = [
     { header: "Fichier", cell: (row) => row.file_name },
@@ -62,7 +68,12 @@ export default async function DocumentsPage({
           <DownloadButton storagePath={row.storage_path} />
           <ConfirmDialog
             trigger={
-              <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-destructive hover:text-destructive"
+                aria-label="Supprimer"
+              >
                 <Trash2 />
               </Button>
             }
@@ -84,19 +95,28 @@ export default async function DocumentsPage({
       />
       <DocumentFilters />
 
-      {documents.length === 0 ? (
+      {documents.length === 0 && allDocuments.length === 0 ? (
         <EmptyState
           icon={FolderOpen}
           title="Aucun document pour l'instant"
           description="Ajoutez des documents depuis la fiche d'un bien ou d'un locataire — ils apparaîtront ici."
         />
       ) : (
-        <DataTable
-          columns={columns}
-          rows={documents}
-          rowKey={(row) => row.id}
-          emptyMessage="Aucun document ne correspond à cette recherche."
-        />
+        <div>
+          <DataTable
+            columns={columns}
+            rows={documents}
+            rowKey={(row) => row.id}
+            emptyMessage="Aucun document ne correspond à cette recherche."
+          />
+          <Pagination
+            currentPage={currentPage}
+            pageCount={pageCount}
+            totalCount={totalCount}
+            basePath="/documents"
+            searchParams={{ type: entityType, q: search }}
+          />
+        </div>
       )}
     </div>
   );
