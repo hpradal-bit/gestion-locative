@@ -26,6 +26,7 @@ export type Database = {
           property_id: string
           supplier: string | null
           user_id: string
+          work_id: string | null
         }
         Insert: {
           amount: number
@@ -38,6 +39,7 @@ export type Database = {
           property_id: string
           supplier?: string | null
           user_id?: string
+          work_id?: string | null
         }
         Update: {
           amount?: number
@@ -50,6 +52,7 @@ export type Database = {
           property_id?: string
           supplier?: string | null
           user_id?: string
+          work_id?: string | null
         }
         Relationships: [
           {
@@ -57,6 +60,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_work_id_fkey"
+            columns: ["work_id"]
+            isOneToOne: false
+            referencedRelation: "works"
             referencedColumns: ["id"]
           },
         ]
@@ -441,6 +451,62 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      works: {
+        Row: {
+          actual_amount: number | null
+          company: string | null
+          created_at: string
+          description: string
+          end_date: string | null
+          estimated_amount: number
+          id: string
+          property_id: string
+          quote_amount: number
+          start_date: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_amount?: number | null
+          company?: string | null
+          created_at?: string
+          description: string
+          end_date?: string | null
+          estimated_amount?: number
+          id?: string
+          property_id: string
+          quote_amount?: number
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          actual_amount?: number | null
+          company?: string | null
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          estimated_amount?: number
+          id?: string
+          property_id?: string
+          quote_amount?: number
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "works_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
