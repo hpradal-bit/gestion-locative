@@ -22,6 +22,7 @@ import {
   calculateTotalProjectCost,
 } from "@/lib/finance";
 import { formatCurrency, formatPercent } from "@/lib/format";
+import { DocumentsSection } from "@/features/documents/documents-section";
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -170,6 +171,8 @@ export default async function BienDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      <DocumentsSection entityType="property" entityId={property.id} />
     </div>
   );
 }

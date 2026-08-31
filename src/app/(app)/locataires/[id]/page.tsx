@@ -18,6 +18,7 @@ import { deleteTenant } from "@/features/tenants/actions";
 import { getLeasesForTenant } from "@/features/leases/queries";
 import { deleteLease, endLease } from "@/features/leases/actions";
 import { formatCurrency } from "@/lib/format";
+import { DocumentsSection } from "@/features/documents/documents-section";
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -151,6 +152,8 @@ export default async function LocataireDetailPage({
           ))}
         </div>
       )}
+
+      <DocumentsSection entityType="tenant" entityId={tenant.id} />
     </div>
   );
 }
