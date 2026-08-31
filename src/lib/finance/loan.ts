@@ -61,3 +61,42 @@ export function calculateRemainingPrincipal({
 
   return Math.max(0, remaining);
 }
+
+export type AmortizationRow = {
+  month: number;
+  payment: number;
+  interest: number;
+  principal: number;
+  remainingPrincipal: number;
+};
+
+/** Tableau d'amortissement mois par mois (mensualité hors assurance). */
+export function calculateAmortizationSchedule({
+  principal,
+  annualInterestRate,
+  durationMonths,
+}: MonthlyPaymentInput): AmortizationRow[] {
+  if (principal <= 0 || durationMonths <= 0) return [];
+
+  const monthlyRate = annualInterestRate / 100 / 12;
+  const payment = calculateMonthlyPayment({ principal, annualInterestRate, durationMonths });
+
+  const rows: AmortizationRow[] = [];
+  let remaining = principal;
+
+  for (let month = 1; month <= durationMonths; month++) {
+    const interest = remaining * monthlyRate;
+    const principalPortion = Math.min(payment - interest, remaining);
+    remaining = Math.max(0, remaining - principalPortion);
+
+    rows.push({
+      month,
+      payment: principalPortion + interest,
+      interest,
+      principal: principalPortion,
+      remainingPrincipal: remaining,
+    });
+  }
+
+  return rows;
+}

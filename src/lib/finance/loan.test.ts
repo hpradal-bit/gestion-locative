@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { calculateMonthlyPayment, calculateRemainingPrincipal } from "./loan";
+import {
+  calculateAmortizationSchedule,
+  calculateMonthlyPayment,
+  calculateRemainingPrincipal,
+} from "./loan";
 
 describe("calculateMonthlyPayment", () => {
   it("calcule une mensualité standard (200 000 € à 3,2 % sur 20 ans)", () => {
@@ -85,5 +89,45 @@ describe("calculateRemainingPrincipal", () => {
       monthsElapsed: 6,
     });
     expect(remaining).toBeCloseTo(6_000, 5);
+  });
+});
+
+describe("calculateAmortizationSchedule", () => {
+  it("génère une ligne par mensualité, capital restant décroissant jusqu'à 0", () => {
+    const schedule = calculateAmortizationSchedule({
+      principal: 200_000,
+      annualInterestRate: 3.2,
+      durationMonths: 240,
+    });
+    expect(schedule).toHaveLength(240);
+    expect(schedule[0].remainingPrincipal).toBeLessThan(200_000);
+    expect(schedule[239].remainingPrincipal).toBeCloseTo(0, 5);
+  });
+
+  it("la somme capital+intérêts de chaque ligne égale la mensualité", () => {
+    const schedule = calculateAmortizationSchedule({
+      principal: 200_000,
+      annualInterestRate: 3.2,
+      durationMonths: 240,
+    });
+    for (const row of schedule) {
+      expect(row.principal + row.interest).toBeCloseTo(row.payment, 6);
+    }
+  });
+
+  it("la somme du capital remboursé égale le capital emprunté", () => {
+    const schedule = calculateAmortizationSchedule({
+      principal: 200_000,
+      annualInterestRate: 3.2,
+      durationMonths: 240,
+    });
+    const totalPrincipal = schedule.reduce((sum, row) => sum + row.principal, 0);
+    expect(totalPrincipal).toBeCloseTo(200_000, 4);
+  });
+
+  it("renvoie un tableau vide pour un capital ou une durée nulle", () => {
+    expect(
+      calculateAmortizationSchedule({ principal: 0, annualInterestRate: 3, durationMonths: 12 })
+    ).toEqual([]);
   });
 });
