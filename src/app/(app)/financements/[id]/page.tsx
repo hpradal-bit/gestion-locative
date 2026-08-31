@@ -19,6 +19,7 @@ import { deleteLoan } from "@/features/loans/actions";
 import { calculateAmortizationSchedule, calculateMonthlyPayment } from "@/lib/finance";
 import { addMonthsClamped } from "@/lib/scheduling";
 import { formatCurrency, formatPercent } from "@/lib/format";
+import { DocumentsSection } from "@/features/documents/documents-section";
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -147,6 +148,8 @@ export default async function CreditDetailPage({
         <h2 className="text-lg font-semibold">Tableau d&apos;amortissement</h2>
         <DataTable columns={columns} rows={scheduleWithDates} rowKey={(row) => String(row.month)} />
       </div>
+
+      <DocumentsSection entityType="loan" entityId={loan.id} />
     </div>
   );
 }
