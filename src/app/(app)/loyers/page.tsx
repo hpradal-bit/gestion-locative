@@ -1,4 +1,4 @@
-import { Wallet } from "lucide-react";
+import { FileText, Wallet } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -75,7 +75,12 @@ export default async function LoyersPage({
       className: "text-right",
       cell: (row) =>
         row.status === "paid" ? (
-          <span className="text-xs text-muted-foreground">—</span>
+          <Button size="sm" variant="ghost" asChild>
+            <a href={`/api/quittances/${row.id}`} target="_blank" rel="noreferrer">
+              <FileText />
+              Quittance
+            </a>
+          </Button>
         ) : (
           <PaymentDialog
             scheduleId={row.id}
