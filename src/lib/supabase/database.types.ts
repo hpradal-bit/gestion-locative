@@ -375,6 +375,53 @@ export type Database = {
         }
         Relationships: []
       }
+      reminders: {
+        Row: {
+          channel: string
+          created_at: string
+          error: string | null
+          id: string
+          level: number
+          message: string
+          rent_schedule_id: string
+          status: string
+          subject: string
+          user_id: string
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          level: number
+          message: string
+          rent_schedule_id: string
+          status: string
+          subject: string
+          user_id?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          level?: number
+          message?: string
+          rent_schedule_id?: string
+          status?: string
+          subject?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminders_rent_schedule_id_fkey"
+            columns: ["rent_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "rent_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rent_schedules: {
         Row: {
           charges_amount: number
