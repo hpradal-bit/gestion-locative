@@ -1,0 +1,154 @@
+"use client";
+
+import * as React from "react";
+import { useActionState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { MoneyInput } from "@/components/shared/money-input";
+import { PropertySelector } from "@/components/shared/property-selector";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import type { Tables } from "@/lib/supabase/database.types";
+import { leaseTypes } from "./schema";
+import type { LeaseActionState } from "./actions";
+
+const LEASE_TYPE_LABELS: Record<(typeof leaseTypes)[number], string> = {
+  vide: "Location vide",
+  meuble: "Location meublée",
+  mobilite: "Bail mobilité",
+  commercial: "Bail commercial",
+  autre: "Autre",
+};
+
+type LeaseFormProps = {
+  tenantId: string;
+  properties: Tables<"properties">[];
+  action: (state: LeaseActionState, formData: FormData) => Promise<LeaseActionState>;
+};
+
+export function LeaseForm({ tenantId, properties, action }: LeaseFormProps) {
+  const [state, formAction, pending] = useActionState(action, { error: null });
+
+  const [initialRent, setInitialRent] = React.useState(0);
+  const [charges, setCharges] = React.useState(0);
+  const rentTouched = React.useRef(false);
+  const chargesTouched = React.useRef(false);
+
+  function handlePropertyChange(propertyId: string) {
+    const property = properties.find((p) => p.id === propertyId);
+    if (!property) return;
+    if (!rentTouched.current) setInitialRent(property.monthly_rent);
+    if (!chargesTouched.current) setCharges(property.monthly_charges);
+  }
+
+  return (
+    <form action={formAction} className="flex flex-col gap-6">
+      <input type="hidden" name="tenant_id" value={tenantId} />
+      <Card>
+        <CardHeader>
+          <CardTitle>Bail</CardTitle>
+          <CardDescription>
+            Le loyer et les charges se pré-remplissent depuis le bien choisi — modifiables si le
+            bail diffère.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-2 sm:col-span-2">
+            <Label htmlFor="property_id">Bien</Label>
+            <PropertySelector
+              name="property_id"
+              properties={properties}
+              onValueChange={handlePropertyChange}
+              required
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="start_date">Date de début</Label>
+            <Input id="start_date" name="start_date" type="date" required />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="end_date">Date de fin (optionnelle)</Label>
+            <Input id="end_date" name="end_date" type="date" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="lease_type">Type de bail</Label>
+            <Select name="lease_type">
+              <SelectTrigger id="lease_type" className="w-full">
+                <SelectValue placeholder="Sélectionner un type" />
+              </SelectTrigger>
+              <SelectContent>
+                {leaseTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {LEASE_TYPE_LABELS[type]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="irl_index">Indice IRL</Label>
+            <Input id="irl_index" name="irl_index" placeholder="ex : 143,12" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="initial_rent">Loyer</Label>
+            <MoneyInput
+              id="initial_rent"
+              name="initial_rent"
+              value={initialRent}
+              onChange={(e) => {
+                rentTouched.current = true;
+                setInitialRent(Number(e.target.value) || 0);
+              }}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="charges">Charges</Label>
+            <MoneyInput
+              id="charges"
+              name="charges"
+              value={charges}
+              onChange={(e) => {
+                chargesTouched.current = true;
+                setCharges(Number(e.target.value) || 0);
+              }}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="security_deposit">Dépôt de garantie</Label>
+            <MoneyInput id="security_deposit" name="security_deposit" defaultValue={0} />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="next_revision_date">Prochaine révision</Label>
+            <Input id="next_revision_date" name="next_revision_date" type="date" />
+          </div>
+        </CardContent>
+      </Card>
+
+      {state.error && (
+        <p className="text-sm text-destructive" role="alert">
+          {state.error}
+        </p>
+      )}
+
+      <div className="flex justify-end">
+        <Button type="submit" disabled={pending}>
+          {pending ? "Création..." : "Créer le bail"}
+        </Button>
+      </div>
+    </form>
+  );
+}
