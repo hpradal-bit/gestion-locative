@@ -541,6 +541,33 @@ export type Database = {
           },
         ]
       }
+      simulations: {
+        Row: {
+          created_at: string
+          id: string
+          input: Json
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input: Json
+          name: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input?: Json
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tenants: {
         Row: {
           address: string | null
