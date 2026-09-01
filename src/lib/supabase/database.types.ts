@@ -235,6 +235,8 @@ export type Database = {
           full_name: string | null
           phone: string | null
           postal_code: string | null
+          social_charges_applicable: boolean
+          tmi_rate: number
           updated_at: string
           user_id: string
         }
@@ -246,6 +248,8 @@ export type Database = {
           full_name?: string | null
           phone?: string | null
           postal_code?: string | null
+          social_charges_applicable?: boolean
+          tmi_rate?: number
           updated_at?: string
           user_id: string
         }
@@ -257,6 +261,8 @@ export type Database = {
           full_name?: string | null
           phone?: string | null
           postal_code?: string | null
+          social_charges_applicable?: boolean
+          tmi_rate?: number
           updated_at?: string
           user_id?: string
         }
@@ -307,6 +313,7 @@ export type Database = {
         Row: {
           address: string | null
           agency_fees: number
+          annual_amortization: number | null
           city: string | null
           condo_fees_annual: number
           created_at: string
@@ -337,6 +344,7 @@ export type Database = {
           rental_start_date: string | null
           rooms: number | null
           surface_m2: number | null
+          tax_regime: string | null
           updated_at: string
           user_id: string
           works_budget: number
@@ -344,6 +352,7 @@ export type Database = {
         Insert: {
           address?: string | null
           agency_fees?: number
+          annual_amortization?: number | null
           city?: string | null
           condo_fees_annual?: number
           created_at?: string
@@ -374,6 +383,7 @@ export type Database = {
           rental_start_date?: string | null
           rooms?: number | null
           surface_m2?: number | null
+          tax_regime?: string | null
           updated_at?: string
           user_id?: string
           works_budget?: number
@@ -381,6 +391,7 @@ export type Database = {
         Update: {
           address?: string | null
           agency_fees?: number
+          annual_amortization?: number | null
           city?: string | null
           condo_fees_annual?: number
           created_at?: string
@@ -411,6 +422,7 @@ export type Database = {
           rental_start_date?: string | null
           rooms?: number | null
           surface_m2?: number | null
+          tax_regime?: string | null
           updated_at?: string
           user_id?: string
           works_budget?: number

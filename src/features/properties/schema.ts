@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { taxRegimes } from "@/lib/finance/tax";
+
 const optionalText = z.preprocess(
   (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
   z.string().trim().optional()
@@ -29,6 +31,7 @@ export const propertyTypes = [
   "parking",
   "autre",
 ] as const;
+
 
 export const propertySchema = z.object({
   // Informations générales
@@ -71,6 +74,15 @@ export const propertySchema = z.object({
   management_fees_annual: money,
   maintenance_annual: money,
   other_charges_annual: money,
+
+  // Fiscalité
+  tax_regime: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.enum(taxRegimes, { message: "Régime fiscal invalide." }).optional()
+  ),
+  // Amortissement annuel estimé, saisi directement (LMNP réel uniquement) —
+  // la ventilation terrain/bâti/mobilier relève de l'expert-comptable.
+  annual_amortization: optionalMoney,
 });
 
 export type PropertyInput = z.infer<typeof propertySchema>;

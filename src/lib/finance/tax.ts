@@ -28,14 +28,14 @@ export const TAX_PARAMETERS_2026 = {
   ],
 } as const;
 
-export type TaxRegime = "micro_foncier" | "reel_foncier" | "lmnp_micro_bic" | "lmnp_reel";
-
-export const taxRegimes: TaxRegime[] = [
+export const taxRegimes = [
   "micro_foncier",
   "reel_foncier",
   "lmnp_micro_bic",
   "lmnp_reel",
-];
+] as const;
+
+export type TaxRegime = (typeof taxRegimes)[number];
 
 export type TaxEstimate = {
   /** Base imposable retenue après abattement/charges/amortissement. */

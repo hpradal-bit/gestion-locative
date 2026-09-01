@@ -25,8 +25,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { Tables } from "@/lib/supabase/database.types";
-import { PROPERTY_TYPE_LABELS } from "./constants";
+import { PROPERTY_TYPE_LABELS, TAX_REGIME_LABELS } from "./constants";
 import { propertyTypes } from "./schema";
+import { taxRegimes } from "@/lib/finance/tax";
 import type { PropertyActionState } from "./actions";
 
 type PropertyFormProps = {
@@ -54,6 +55,7 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
     property?.other_acquisition_fees ?? 0
   );
   const [monthlyRent, setMonthlyRent] = React.useState(property?.monthly_rent ?? 0);
+  const [taxRegime, setTaxRegime] = React.useState(property?.tax_regime ?? "");
 
   const totalProjectCost = calculateTotalProjectCost({
     purchasePrice,
@@ -271,6 +273,43 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
             <div className="flex flex-col justify-end pb-2 text-sm text-muted-foreground">
               Dernière mise à jour :{" "}
               {new Date(property.current_value_updated_at).toLocaleDateString("fr-FR")}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Fiscalité</CardTitle>
+          <CardDescription>
+            Utilisé pour estimer le cash-flow après impôt de ce bien. Laissez vide si vous ne
+            savez pas encore — le cash-flow restera affiché avant impôt.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="tax_regime">Régime fiscal</Label>
+            <Select name="tax_regime" value={taxRegime} onValueChange={setTaxRegime}>
+              <SelectTrigger id="tax_regime" className="w-full">
+                <SelectValue placeholder="Non renseigné" />
+              </SelectTrigger>
+              <SelectContent>
+                {taxRegimes.map((regime) => (
+                  <SelectItem key={regime} value={regime}>
+                    {TAX_REGIME_LABELS[regime]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {taxRegime === "lmnp_reel" && (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="annual_amortization">Amortissement annuel estimé</Label>
+              <MoneyInput
+                id="annual_amortization"
+                name="annual_amortization"
+                defaultValue={property?.annual_amortization ?? ""}
+              />
             </div>
           )}
         </CardContent>
