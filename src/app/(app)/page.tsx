@@ -139,16 +139,44 @@ export default async function DashboardPage({ searchParams }: PageProps<"/">) {
           icon={Landmark}
         />
         <KpiCard
-          label="Cash-flow mensuel"
+          label="Cash-flow mensuel (avant impôt)"
           value={formatCurrency(data.cashFlowMonthly)}
           icon={Wallet}
           tone={data.cashFlowMonthly >= 0 ? "positive" : "negative"}
         />
         <KpiCard
-          label="Cash-flow annuel"
+          label="Cash-flow annuel (avant impôt)"
           value={formatCurrency(data.cashFlowAnnual)}
           icon={Wallet}
           tone={data.cashFlowAnnual >= 0 ? "positive" : "negative"}
+        />
+        <KpiCard
+          label="Impôt estimé (12 mois)"
+          value={data.estimatedAnnualTax == null ? "—" : formatCurrency(data.estimatedAnnualTax)}
+          icon={Landmark}
+          hint={
+            data.estimatedAnnualTax == null
+              ? "Renseignez un régime fiscal par bien"
+              : !data.hasCompleteTaxRegimeCoverage
+                ? "Estimation partielle : régime manquant sur certains biens"
+                : undefined
+          }
+        />
+        <KpiCard
+          label="Cash-flow annuel après impôt"
+          value={
+            data.cashFlowAnnualAfterTax == null
+              ? "—"
+              : formatCurrency(data.cashFlowAnnualAfterTax)
+          }
+          icon={Wallet}
+          tone={
+            data.cashFlowAnnualAfterTax == null
+              ? "default"
+              : data.cashFlowAnnualAfterTax >= 0
+                ? "positive"
+                : "negative"
+          }
         />
         <KpiCard
           label="Dépenses (mois)"

@@ -43,6 +43,13 @@ export type DashboardData = {
   cashFlowMonthly: number;
   cashFlowAnnual: number;
 
+  /** null tant qu'aucun bien du périmètre n'a de régime fiscal renseigné. */
+  estimatedAnnualTax: number | null;
+  cashFlowMonthlyAfterTax: number | null;
+  cashFlowAnnualAfterTax: number | null;
+  /** false si au moins un bien du périmètre n'a pas de régime fiscal renseigné — l'estimation est alors partielle. */
+  hasCompleteTaxRegimeCoverage: boolean;
+
   averageGrossYield: number;
 
   revenueSeries: MonthlyAmount[];
