@@ -116,37 +116,45 @@ export default async function LocataireDetailPage({
                 <InfoRow label="Loyer" value={formatCurrency(lease.initial_rent)} />
                 <InfoRow label="Charges" value={formatCurrency(lease.charges)} />
                 <InfoRow label="Dépôt de garantie" value={formatCurrency(lease.security_deposit)} />
-                {lease.status === "active" && (
-                  <div className="flex justify-end gap-2 pt-2">
-                    <ConfirmDialog
-                      trigger={
-                        <Button variant="outline" size="sm">
-                          Mettre fin au bail
-                        </Button>
-                      }
-                      title="Mettre fin à ce bail ?"
-                      description="Le bail sera marqué comme terminé à la date du jour. Cette action ne supprime pas l'historique des paiements."
-                      confirmLabel="Mettre fin au bail"
-                      variant="default"
-                      action={endLease.bind(null, lease.id, tenant.id)}
-                    />
-                    <ConfirmDialog
-                      trigger={
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                        >
-                          Supprimer
-                        </Button>
-                      }
-                      title="Supprimer ce bail ?"
-                      description="Cette action est irréversible et supprimera aussi ses échéances et paiements associés."
-                      confirmLabel="Supprimer"
-                      action={deleteLease.bind(null, lease.id, tenant.id)}
-                    />
-                  </div>
-                )}
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/locataires/${tenant.id}/baux/${lease.id}/modifier`}>
+                      <Pencil />
+                      Modifier
+                    </Link>
+                  </Button>
+                  {lease.status === "active" && (
+                    <>
+                      <ConfirmDialog
+                        trigger={
+                          <Button variant="outline" size="sm">
+                            Mettre fin au bail
+                          </Button>
+                        }
+                        title="Mettre fin à ce bail ?"
+                        description="Le bail sera marqué comme terminé à la date du jour. Cette action ne supprime pas l'historique des paiements."
+                        confirmLabel="Mettre fin au bail"
+                        variant="default"
+                        action={endLease.bind(null, lease.id, tenant.id)}
+                      />
+                      <ConfirmDialog
+                        trigger={
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            Supprimer
+                          </Button>
+                        }
+                        title="Supprimer ce bail ?"
+                        description="Cette action est irréversible et supprimera aussi ses échéances et paiements associés."
+                        confirmLabel="Supprimer"
+                        action={deleteLease.bind(null, lease.id, tenant.id)}
+                      />
+                    </>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}

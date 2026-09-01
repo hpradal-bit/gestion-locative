@@ -57,6 +57,34 @@ export async function createLease(
   redirect(`/locataires/${tenantId}`);
 }
 
+export async function updateLease(
+  leaseId: string,
+  tenantId: string,
+  _prevState: LeaseActionState,
+  formData: FormData
+): Promise<LeaseActionState> {
+  const parsed = parseLeaseFormData(formData);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("leases").update(parsed.data).eq("id", leaseId);
+
+  if (error) {
+    return { error: GENERIC_ERROR };
+  }
+
+  // Les échéances déjà générées (parfois déjà payées) ne sont jamais
+  // réécrites rétroactivement : un changement de loyer ici ne vaut que
+  // pour les informations du bail lui-même, pas pour l'historique des
+  // échéances déjà émises.
+  revalidatePath("/loyers");
+  revalidatePath(`/locataires/${tenantId}`);
+  revalidatePath(`/biens/${parsed.data.property_id}`);
+  redirect(`/locataires/${tenantId}`);
+}
+
 export async function endLease(leaseId: string, tenantId: string): Promise<void> {
   const supabase = await createClient();
   const { error } = await supabase

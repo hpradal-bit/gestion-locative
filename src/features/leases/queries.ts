@@ -19,3 +19,9 @@ export async function getLeasesForProperty(propertyId: string) {
     .order("start_date", { ascending: false });
   return data ?? [];
 }
+
+export async function getLease(leaseId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase.from("leases").select("*").eq("id", leaseId).maybeSingle();
+  return data;
+}

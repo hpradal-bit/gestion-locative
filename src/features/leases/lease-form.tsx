@@ -38,15 +38,20 @@ type LeaseFormProps = {
   tenantId: string;
   properties: Tables<"properties">[];
   action: (state: LeaseActionState, formData: FormData) => Promise<LeaseActionState>;
+  lease?: Tables<"leases">;
+  submitLabel?: string;
 };
 
-export function LeaseForm({ tenantId, properties, action }: LeaseFormProps) {
+export function LeaseForm({ tenantId, properties, action, lease, submitLabel }: LeaseFormProps) {
   const [state, formAction, pending] = useActionState(action, { error: null });
 
-  const [initialRent, setInitialRent] = React.useState(0);
-  const [charges, setCharges] = React.useState(0);
-  const rentTouched = React.useRef(false);
-  const chargesTouched = React.useRef(false);
+  const [initialRent, setInitialRent] = React.useState(lease?.initial_rent ?? 0);
+  const [charges, setCharges] = React.useState(lease?.charges ?? 0);
+  // En édition, le loyer/charges viennent du bail existant : on ne veut pas
+  // qu'un changement de bien dans le sélecteur les réinitialise depuis le
+  // bien (comportement voulu uniquement à la création).
+  const rentTouched = React.useRef(Boolean(lease));
+  const chargesTouched = React.useRef(Boolean(lease));
 
   function handlePropertyChange(propertyId: string) {
     const property = properties.find((p) => p.id === propertyId);
@@ -72,21 +77,33 @@ export function LeaseForm({ tenantId, properties, action }: LeaseFormProps) {
             <PropertySelector
               name="property_id"
               properties={properties}
+              defaultValue={lease?.property_id}
               onValueChange={handlePropertyChange}
               required
             />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="start_date">Date de début</Label>
-            <Input id="start_date" name="start_date" type="date" required />
+            <Input
+              id="start_date"
+              name="start_date"
+              type="date"
+              defaultValue={lease?.start_date ?? undefined}
+              required
+            />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="end_date">Date de fin (optionnelle)</Label>
-            <Input id="end_date" name="end_date" type="date" />
+            <Input
+              id="end_date"
+              name="end_date"
+              type="date"
+              defaultValue={lease?.end_date ?? undefined}
+            />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="lease_type">Type de bail</Label>
-            <Select name="lease_type">
+            <Select name="lease_type" defaultValue={lease?.lease_type ?? undefined}>
               <SelectTrigger id="lease_type" className="w-full">
                 <SelectValue placeholder="Sélectionner un type" />
               </SelectTrigger>
@@ -101,7 +118,12 @@ export function LeaseForm({ tenantId, properties, action }: LeaseFormProps) {
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="irl_index">Indice IRL</Label>
-            <Input id="irl_index" name="irl_index" placeholder="ex : 143,12" />
+            <Input
+              id="irl_index"
+              name="irl_index"
+              placeholder="ex : 143,12"
+              defaultValue={lease?.irl_index ?? undefined}
+            />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="initial_rent">Loyer</Label>
@@ -129,11 +151,20 @@ export function LeaseForm({ tenantId, properties, action }: LeaseFormProps) {
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="security_deposit">Dépôt de garantie</Label>
-            <MoneyInput id="security_deposit" name="security_deposit" defaultValue={0} />
+            <MoneyInput
+              id="security_deposit"
+              name="security_deposit"
+              defaultValue={lease?.security_deposit ?? 0}
+            />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="next_revision_date">Prochaine révision</Label>
-            <Input id="next_revision_date" name="next_revision_date" type="date" />
+            <Input
+              id="next_revision_date"
+              name="next_revision_date"
+              type="date"
+              defaultValue={lease?.next_revision_date ?? undefined}
+            />
           </div>
         </CardContent>
       </Card>
@@ -146,7 +177,7 @@ export function LeaseForm({ tenantId, properties, action }: LeaseFormProps) {
 
       <div className="flex justify-end">
         <Button type="submit" disabled={pending}>
-          {pending ? "Création..." : "Créer le bail"}
+          {pending ? "Enregistrement..." : (submitLabel ?? "Créer le bail")}
         </Button>
       </div>
     </form>
