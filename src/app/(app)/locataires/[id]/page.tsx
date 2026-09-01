@@ -17,6 +17,8 @@ import { getTenant } from "@/features/tenants/queries";
 import { deleteTenant } from "@/features/tenants/actions";
 import { getLeasesForTenant } from "@/features/leases/queries";
 import { deleteLease, endLease } from "@/features/leases/actions";
+import { listTemplates } from "@/features/templates/queries";
+import { GenerateDocumentButton } from "@/features/templates/generate-document-button";
 import { formatCurrency } from "@/lib/format";
 import { DocumentsSection } from "@/features/documents/documents-section";
 
@@ -39,7 +41,7 @@ export default async function LocataireDetailPage({
     notFound();
   }
 
-  const leases = await getLeasesForTenant(id);
+  const [leases, templates] = await Promise.all([getLeasesForTenant(id), listTemplates()]);
 
   return (
     <div className="flex flex-1 flex-col gap-6">
@@ -117,6 +119,7 @@ export default async function LocataireDetailPage({
                 <InfoRow label="Charges" value={formatCurrency(lease.charges)} />
                 <InfoRow label="Dépôt de garantie" value={formatCurrency(lease.security_deposit)} />
                 <div className="flex justify-end gap-2 pt-2">
+                  <GenerateDocumentButton leaseId={lease.id} templates={templates} />
                   <Button variant="outline" size="sm" asChild>
                     <Link href={`/locataires/${tenant.id}/baux/${lease.id}/modifier`}>
                       <Pencil />
