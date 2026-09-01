@@ -1,8 +1,13 @@
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { AppHeader } from "@/components/layout/app-header";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { ensureUpcomingRentSchedules } from "@/features/rent-schedules/ensure-schedules";
 
-export default function AppLayout({ children }: LayoutProps<"/">) {
+export default async function AppLayout({ children }: LayoutProps<"/">) {
+  // Pas de tâche planifiée dans cette app : on comble ici les échéances de
+  // loyer manquantes à chaque visite (voir ensure-schedules.ts).
+  await ensureUpcomingRentSchedules();
+
   return (
     <div className="flex min-h-screen w-full">
       <AppSidebar />
