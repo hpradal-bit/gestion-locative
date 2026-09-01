@@ -118,6 +118,7 @@ export default async function LocataireDetailPage({
                 <InfoRow label="Loyer" value={formatCurrency(lease.initial_rent)} />
                 <InfoRow label="Charges" value={formatCurrency(lease.charges)} />
                 <InfoRow label="Dépôt de garantie" value={formatCurrency(lease.security_deposit)} />
+                <InfoRow label="Jour de paiement" value={`Le ${lease.payment_due_day} du mois`} />
                 <div className="flex justify-end gap-2 pt-2">
                   <GenerateDocumentButton leaseId={lease.id} templates={templates} />
                   <Button variant="outline" size="sm" asChild>

@@ -13,9 +13,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { InlineDateField } from "@/components/shared/inline-date-field";
 import type { Tables } from "@/lib/supabase/database.types";
 import { formatCurrency } from "@/lib/format";
-import { deletePayment } from "./actions";
+import { deletePayment, updatePaymentDate } from "./actions";
 import { EditPaymentDialog } from "./edit-payment-dialog";
 import { paymentMethods } from "./schema";
 
@@ -26,14 +27,6 @@ const PAYMENT_METHOD_LABELS: Record<(typeof paymentMethods)[number], string> = {
   prelevement: "Prélèvement",
   autre: "Autre",
 };
-
-function formatDate(value: string) {
-  return new Date(value).toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
 
 export function PaymentsListDialog({
   payments,
@@ -64,12 +57,18 @@ export function PaymentsListDialog({
               >
                 <div className="min-w-0">
                   <p className="font-medium">{formatCurrency(payment.amount)}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatDate(payment.paid_at)}
-                    {payment.payment_method &&
-                      ` — ${PAYMENT_METHOD_LABELS[payment.payment_method as (typeof paymentMethods)[number]] ?? payment.payment_method}`}
-                    {payment.comment ? ` — ${payment.comment}` : ""}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                    <InlineDateField
+                      value={payment.paid_at}
+                      ariaLabel="Date de ce paiement"
+                      onSave={updatePaymentDate.bind(null, payment.id)}
+                    />
+                    <span>
+                      {payment.payment_method &&
+                        `— ${PAYMENT_METHOD_LABELS[payment.payment_method as (typeof paymentMethods)[number]] ?? payment.payment_method}`}
+                      {payment.comment ? ` — ${payment.comment}` : ""}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <EditPaymentDialog payment={payment} />

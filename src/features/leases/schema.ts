@@ -28,6 +28,12 @@ export const leaseSchema = z.object({
   security_deposit: money,
   irl_index: optionalText,
   next_revision_date: optionalDate,
+  payment_due_day: z.coerce
+    .number()
+    .int()
+    .min(1, "Le jour doit être entre 1 et 31.")
+    .max(31, "Le jour doit être entre 1 et 31.")
+    .default(1),
 });
 
 export type LeaseInput = z.infer<typeof leaseSchema>;

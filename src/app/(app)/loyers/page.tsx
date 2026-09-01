@@ -27,7 +27,8 @@ import { getLastRemindersByScheduleIds } from "@/features/reminders/queries";
 import { RentFilters } from "@/features/rent-schedules/rent-filters";
 import { SelectAllCheckbox } from "@/features/rent-schedules/select-all-checkbox";
 import { EditScheduleDialog } from "@/features/rent-schedules/edit-schedule-dialog";
-import { deleteRentSchedule } from "@/features/rent-schedules/actions";
+import { deleteRentSchedule, updateRentScheduleDueDate } from "@/features/rent-schedules/actions";
+import { InlineDateField } from "@/components/shared/inline-date-field";
 import { listRentSchedules } from "@/features/rent-schedules/queries";
 import type { RentScheduleWithDetails } from "@/features/rent-schedules/types";
 import type { RentScheduleStatus } from "@/lib/finance";
@@ -112,7 +113,13 @@ export default async function LoyersPage({
     },
     {
       header: "Échéance",
-      cell: (row) => formatDate(row.due_date),
+      cell: (row) => (
+        <InlineDateField
+          value={row.due_date}
+          ariaLabel={`Date d'échéance de ${row.tenantName}`}
+          onSave={updateRentScheduleDueDate.bind(null, row.id)}
+        />
+      ),
     },
     {
       header: "Montant dû",

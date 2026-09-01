@@ -166,6 +166,18 @@ export function LeaseForm({ tenantId, properties, action, lease, submitLabel }: 
               defaultValue={lease?.next_revision_date ?? undefined}
             />
           </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="payment_due_day">Jour de paiement du loyer</Label>
+            <Input
+              id="payment_due_day"
+              name="payment_due_day"
+              type="number"
+              min={1}
+              max={31}
+              defaultValue={lease?.payment_due_day ?? 1}
+              required
+            />
+          </div>
         </CardContent>
       </Card>
 

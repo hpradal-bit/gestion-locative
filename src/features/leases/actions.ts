@@ -42,7 +42,7 @@ export async function createLease(
   const { data: lease, error } = await supabase
     .from("leases")
     .insert(parsed.data)
-    .select("id, start_date, initial_rent, charges")
+    .select("id, start_date, initial_rent, charges, payment_due_day")
     .single();
 
   if (error || !lease) {
@@ -52,6 +52,7 @@ export async function createLease(
   // Les échéances sont dérivées du bail — jamais ressaisies (une information = une source).
   const schedules = generateRentSchedules({
     startDate: new Date(lease.start_date),
+    paymentDueDay: lease.payment_due_day,
     rentAmount: lease.initial_rent,
     chargesAmount: lease.charges,
     count: INITIAL_SCHEDULE_COUNT,

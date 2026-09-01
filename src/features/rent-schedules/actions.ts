@@ -44,6 +44,28 @@ export async function updateRentSchedule(
   return { error: null, success: true };
 }
 
+/** Correction rapide de la seule date d'échéance, en un clic depuis la liste des loyers. */
+export async function updateRentScheduleDueDate(scheduleId: string, dueDate: string): Promise<void> {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) {
+    throw new Error("Date invalide.");
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("rent_schedules")
+    .update({ due_date: dueDate })
+    .eq("id", scheduleId);
+
+  if (error) {
+    throw new Error("Impossible de modifier la date d'échéance. Réessayez.");
+  }
+
+  await logActivity({ action: "lease_updated", entityLabel: "Date d'échéance modifiée" });
+
+  revalidatePath("/loyers");
+  revalidatePath("/");
+}
+
 /** Supprime une échéance mal renseignée. Les paiements associés sont supprimés en cascade. */
 export async function deleteRentSchedule(scheduleId: string): Promise<void> {
   const supabase = await createClient();

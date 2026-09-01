@@ -174,6 +174,7 @@ export type Database = {
           irl_index: string | null
           lease_type: string | null
           next_revision_date: string | null
+          payment_due_day: number
           property_id: string
           security_deposit: number
           start_date: string
@@ -191,6 +192,7 @@ export type Database = {
           irl_index?: string | null
           lease_type?: string | null
           next_revision_date?: string | null
+          payment_due_day?: number
           property_id: string
           security_deposit?: number
           start_date: string
@@ -208,6 +210,7 @@ export type Database = {
           irl_index?: string | null
           lease_type?: string | null
           next_revision_date?: string | null
+          payment_due_day?: number
           property_id?: string
           security_deposit?: number
           start_date?: string

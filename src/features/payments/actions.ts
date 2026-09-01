@@ -76,6 +76,25 @@ export async function updatePayment(
   return { error: null, success: true };
 }
 
+/** Correction rapide de la seule date de paiement, en un clic depuis la liste des paiements. */
+export async function updatePaymentDate(paymentId: string, paidAt: string): Promise<void> {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(paidAt)) {
+    throw new Error("Date invalide.");
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("payments").update({ paid_at: paidAt }).eq("id", paymentId);
+
+  if (error) {
+    throw new Error("Impossible de modifier la date de paiement. Réessayez.");
+  }
+
+  await logActivity({ action: "payment_recorded", entityLabel: "Date de paiement modifiée" });
+
+  revalidatePath("/loyers");
+  revalidatePath("/");
+}
+
 export async function deletePayment(paymentId: string): Promise<void> {
   const supabase = await createClient();
   const { data: payment } = await supabase
