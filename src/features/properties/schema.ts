@@ -12,6 +12,15 @@ const optionalDate = z.preprocess(
 
 const money = z.coerce.number().min(0, "Le montant doit être positif ou nul").default(0);
 
+// Distinct de `money` : une valorisation non renseignée doit rester `null`
+// en base (jamais 0, qui serait une fausse information), pour que l'UI
+// puisse retomber sur le prix d'achat plutôt que d'afficher une
+// valorisation à 0 €.
+const optionalMoney = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+  z.coerce.number().min(0, "Le montant doit être positif ou nul").optional()
+);
+
 export const propertyTypes = [
   "appartement",
   "maison",
@@ -43,6 +52,7 @@ export const propertySchema = z.object({
   // Acquisition
   purchase_price: z.coerce.number().min(0).optional(),
   purchase_date: optionalDate,
+  current_value: optionalMoney,
   notary_fees: money,
   agency_fees: money,
   other_acquisition_fees: money,

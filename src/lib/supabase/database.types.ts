@@ -310,6 +310,8 @@ export type Database = {
           city: string | null
           condo_fees_annual: number
           created_at: string
+          current_value: number | null
+          current_value_updated_at: string | null
           floor: number | null
           furniture_budget: number
           has_balcony: boolean
@@ -345,6 +347,8 @@ export type Database = {
           city?: string | null
           condo_fees_annual?: number
           created_at?: string
+          current_value?: number | null
+          current_value_updated_at?: string | null
           floor?: number | null
           furniture_budget?: number
           has_balcony?: boolean
@@ -380,6 +384,8 @@ export type Database = {
           city?: string | null
           condo_fees_annual?: number
           created_at?: string
+          current_value?: number | null
+          current_value_updated_at?: string | null
           floor?: number | null
           furniture_budget?: number
           has_balcony?: boolean

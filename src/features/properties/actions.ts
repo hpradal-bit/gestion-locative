@@ -23,7 +23,11 @@ export async function createProperty(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("properties")
-    .insert(parsed.data)
+    .insert({
+      ...parsed.data,
+      current_value_updated_at:
+        parsed.data.current_value !== undefined ? new Date().toISOString().slice(0, 10) : null,
+    })
     .select("id")
     .single();
 
@@ -46,9 +50,30 @@ export async function updateProperty(
   }
 
   const supabase = await createClient();
+
+  // La date de dernière valorisation ne doit bouger que si la valorisation
+  // elle-même change — pas à chaque modification du bien.
+  const { data: existing } = await supabase
+    .from("properties")
+    .select("current_value")
+    .eq("id", propertyId)
+    .maybeSingle();
+
+  const valuationChanged = (existing?.current_value ?? null) !== (parsed.data.current_value ?? null);
+
   const { error } = await supabase
     .from("properties")
-    .update(parsed.data)
+    .update({
+      ...parsed.data,
+      ...(valuationChanged
+        ? {
+            current_value_updated_at:
+              parsed.data.current_value !== undefined
+                ? new Date().toISOString().slice(0, 10)
+                : null,
+          }
+        : {}),
+    })
     .eq("id", propertyId);
 
   if (error) {

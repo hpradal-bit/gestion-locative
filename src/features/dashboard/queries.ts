@@ -25,6 +25,9 @@ function emptyDashboardData(): DashboardData {
     propertiesCount: 0,
     activeTenantsCount: 0,
     totalPatrimonyValue: 0,
+    totalPurchasePrice: 0,
+    totalCurrentValue: 0,
+    totalCapitalGain: null,
     monthlyRentTotal: 0,
     annualRentTotal: 0,
     rentCollectedThisMonth: 0,
@@ -54,25 +57,32 @@ function emptyDashboardData(): DashboardData {
   };
 }
 
-export async function getDashboardData(): Promise<DashboardData> {
+export async function getDashboardData(propertyId?: string): Promise<DashboardData> {
   const supabase = await createClient();
   const now = new Date();
   const historyStart = new Date(now.getFullYear(), now.getMonth() - (HISTORY_MONTHS - 1), 1);
+
+  let propertiesQuery = supabase.from("properties").select("*");
+  let leasesQuery = supabase.from("leases").select("*").eq("status", "active");
+  let loansQuery = supabase.from("loans").select("*");
+  let expensesQuery = supabase
+    .from("expenses")
+    .select("*")
+    .gte("expense_date", historyStart.toISOString().slice(0, 10));
+
+  if (propertyId) {
+    propertiesQuery = propertiesQuery.eq("id", propertyId);
+    leasesQuery = leasesQuery.eq("property_id", propertyId);
+    loansQuery = loansQuery.eq("property_id", propertyId);
+    expensesQuery = expensesQuery.eq("property_id", propertyId);
+  }
 
   const [
     { data: properties },
     { data: leases },
     { data: loans },
     { data: expenses },
-  ] = await Promise.all([
-    supabase.from("properties").select("*"),
-    supabase.from("leases").select("*").eq("status", "active"),
-    supabase.from("loans").select("*"),
-    supabase
-      .from("expenses")
-      .select("*")
-      .gte("expense_date", historyStart.toISOString().slice(0, 10)),
-  ]);
+  ] = await Promise.all([propertiesQuery, leasesQuery, loansQuery, expensesQuery]);
 
   const propertyRows = properties ?? [];
   const leaseRows = leases ?? [];
@@ -112,6 +122,18 @@ export async function getDashboardData(): Promise<DashboardData> {
     (sum, p) => sum + (p.purchase_price ?? 0),
     0
   );
+  const totalPurchasePrice = totalPatrimonyValue;
+  // Valorisation actuelle : retombe sur le prix d'achat bien par bien tant
+  // qu'elle n'a pas été estimée — jamais une hypothèse implicite globale.
+  const totalCurrentValue = propertyRows.reduce(
+    (sum, p) => sum + (p.current_value ?? p.purchase_price ?? 0),
+    0
+  );
+  // La plus-value n'est calculable que si AU MOINS un bien du périmètre a
+  // une valorisation renseignée — sinon elle vaudrait toujours 0, ce qui
+  // serait une fausse information plutôt qu'une vraie absence de donnée.
+  const hasAnyValuation = propertyRows.some((p) => p.current_value != null);
+  const totalCapitalGain = hasAnyValuation ? totalCurrentValue - totalPurchasePrice : null;
   const monthlyRentTotal = leaseRows.reduce(
     (sum, l) => sum + l.initial_rent + l.charges,
     0
@@ -248,6 +270,9 @@ export async function getDashboardData(): Promise<DashboardData> {
     propertiesCount: propertyRows.length,
     activeTenantsCount: new Set(leaseRows.map((l) => l.tenant_id)).size,
     totalPatrimonyValue,
+    totalPurchasePrice,
+    totalCurrentValue,
+    totalCapitalGain,
     monthlyRentTotal,
     annualRentTotal,
     rentCollectedThisMonth,

@@ -17,6 +17,7 @@ import { deleteProperty } from "@/features/properties/actions";
 import { PROPERTY_TYPE_LABELS } from "@/features/properties/constants";
 import type { propertyTypes } from "@/features/properties/schema";
 import {
+  calculateCapitalGain,
   calculateGrossYield,
   calculateNetYield,
   calculateTotalProjectCost,
@@ -64,6 +65,11 @@ export default async function BienDetailPage({
     annualRent: property.monthly_rent * 12,
     totalProjectCost,
   });
+  const capitalGain = calculateCapitalGain({
+    purchasePrice: property.purchase_price,
+    currentValue: property.current_value,
+  });
+
   const netYield = calculateNetYield({
     annualRent: property.monthly_rent * 12,
     annualRecurringExpenses,
@@ -121,6 +127,43 @@ export default async function BienDetailPage({
               label="Coût total du projet"
               value={<span className="text-base">{formatCurrency(totalProjectCost)}</span>}
             />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Valorisation & plus-value</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <InfoRow
+              label="Valorisation actuelle"
+              value={
+                property.current_value != null
+                  ? formatCurrency(property.current_value)
+                  : `${formatCurrency(property.purchase_price ?? 0)} (= prix d'achat, non estimée)`
+              }
+            />
+            <InfoRow
+              label="Plus-value potentielle"
+              value={
+                capitalGain == null ? (
+                  "—"
+                ) : (
+                  <span
+                    className={capitalGain >= 0 ? "text-emerald-600" : "text-destructive"}
+                  >
+                    {capitalGain >= 0 ? "+" : ""}
+                    {formatCurrency(capitalGain)}
+                  </span>
+                )
+              }
+            />
+            {property.current_value_updated_at && (
+              <InfoRow
+                label="Dernière estimation"
+                value={new Date(property.current_value_updated_at).toLocaleDateString("fr-FR")}
+              />
+            )}
           </CardContent>
         </Card>
 

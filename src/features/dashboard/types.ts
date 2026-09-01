@@ -21,6 +21,12 @@ export type DashboardData = {
   propertiesCount: number;
   activeTenantsCount: number;
   totalPatrimonyValue: number;
+  /** Somme des prix d'achat — figée, jamais confondue avec la valorisation actuelle. */
+  totalPurchasePrice: number;
+  /** Somme des valorisations actuelles ; retombe sur le prix d'achat bien par bien si non estimée. */
+  totalCurrentValue: number;
+  /** null tant qu'aucun bien du périmètre n'a de valorisation actuelle renseignée. */
+  totalCapitalGain: number | null;
 
   monthlyRentTotal: number;
   annualRentTotal: number;

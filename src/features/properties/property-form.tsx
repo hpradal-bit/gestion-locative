@@ -251,6 +251,33 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
 
       <Card>
         <CardHeader>
+          <CardTitle>Valorisation actuelle</CardTitle>
+          <CardDescription>
+            Estimation indépendante du prix d&apos;achat — sert au calcul de la plus-value. Laissez
+            vide si vous ne l&apos;avez pas encore estimée : le prix d&apos;achat sera utilisé par
+            défaut.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="current_value">Valorisation estimée</Label>
+            <MoneyInput
+              id="current_value"
+              name="current_value"
+              defaultValue={property?.current_value ?? ""}
+            />
+          </div>
+          {property?.current_value_updated_at && (
+            <div className="flex flex-col justify-end pb-2 text-sm text-muted-foreground">
+              Dernière mise à jour :{" "}
+              {new Date(property.current_value_updated_at).toLocaleDateString("fr-FR")}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Location</CardTitle>
           <CardDescription>Loyer cible et date de mise en location.</CardDescription>
         </CardHeader>

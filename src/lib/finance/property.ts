@@ -86,3 +86,18 @@ export function calculateReturnOnInvestment(input: {
 }): number {
   return safeRatio(input.annualCashFlow, input.downPayment);
 }
+
+/**
+ * Plus-value potentielle = valorisation actuelle - prix d'achat.
+ * Volontairement distinct du coût total du projet (qui inclut frais/travaux) :
+ * c'est la plus-value patrimoniale brute, pas la rentabilité de l'opération.
+ * Retourne `null` tant que la valorisation actuelle n'a pas été renseignée —
+ * jamais une valeur calculée à partir d'une hypothèse implicite.
+ */
+export function calculateCapitalGain(input: {
+  purchasePrice: number | null;
+  currentValue: number | null;
+}): number | null {
+  if (input.currentValue == null || input.purchasePrice == null) return null;
+  return input.currentValue - input.purchasePrice;
+}

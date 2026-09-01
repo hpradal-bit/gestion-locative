@@ -18,13 +18,21 @@ import { CashFlowChart } from "@/components/charts/cashflow-chart";
 import { ExpenseBreakdownChart } from "@/components/charts/expense-breakdown-chart";
 import { RemainingPrincipalChart } from "@/components/charts/remaining-principal-chart";
 import { getDashboardData } from "@/features/dashboard/queries";
+import { listProperties } from "@/features/properties/queries";
+import { DashboardFilters } from "@/features/dashboard/dashboard-filters";
 import { formatMonthLabel } from "@/lib/date-utils";
 import { formatCurrency, formatPercent } from "@/lib/format";
 
-export default async function DashboardPage() {
-  const data = await getDashboardData();
+export default async function DashboardPage({ searchParams }: PageProps<"/">) {
+  const params = await searchParams;
+  const propertyId = typeof params.bien === "string" ? params.bien : undefined;
 
-  if (data.propertiesCount === 0) {
+  const [properties, data] = await Promise.all([
+    listProperties(),
+    getDashboardData(propertyId),
+  ]);
+
+  if (properties.length === 0) {
     return (
       <div className="flex flex-1 flex-col gap-6">
         <PageHeader
@@ -65,12 +73,32 @@ export default async function DashboardPage() {
         description="Vue globale de votre patrimoine locatif."
       />
 
+      <DashboardFilters properties={properties} />
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          label="Valeur du patrimoine"
-          value={formatCurrency(data.totalPatrimonyValue)}
+          label="Prix total d'achat"
+          value={formatCurrency(data.totalPurchasePrice)}
           icon={Building2}
           hint={`${data.propertiesCount} bien${data.propertiesCount > 1 ? "s" : ""}`}
+        />
+        <KpiCard
+          label="Valorisation actuelle totale"
+          value={formatCurrency(data.totalCurrentValue)}
+          icon={Building2}
+        />
+        <KpiCard
+          label="Plus-value potentielle"
+          value={data.totalCapitalGain == null ? "—" : formatCurrency(data.totalCapitalGain)}
+          icon={TrendingUp}
+          tone={
+            data.totalCapitalGain == null
+              ? "default"
+              : data.totalCapitalGain >= 0
+                ? "positive"
+                : "negative"
+          }
+          hint={data.totalCapitalGain == null ? "Aucune valorisation estimée" : undefined}
         />
         <KpiCard
           label="Locataires actifs"

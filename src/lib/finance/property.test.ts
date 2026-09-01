@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  calculateCapitalGain,
   calculateCashFlow,
   calculateGrossYield,
   calculateNetYield,
@@ -100,5 +101,27 @@ describe("calculateReturnOnInvestment", () => {
     expect(
       calculateReturnOnInvestment({ annualCashFlow: 1_000, downPayment: 0 })
     ).toBe(0);
+  });
+});
+
+describe("calculateCapitalGain", () => {
+  it("calcule la plus-value quand valorisation et prix d'achat sont connus", () => {
+    expect(
+      calculateCapitalGain({ purchasePrice: 200_000, currentValue: 250_000 })
+    ).toBe(50_000);
+  });
+
+  it("peut être négative (moins-value)", () => {
+    expect(
+      calculateCapitalGain({ purchasePrice: 200_000, currentValue: 180_000 })
+    ).toBe(-20_000);
+  });
+
+  it("renvoie null si la valorisation n'est pas renseignée", () => {
+    expect(calculateCapitalGain({ purchasePrice: 200_000, currentValue: null })).toBeNull();
+  });
+
+  it("renvoie null si le prix d'achat n'est pas renseigné", () => {
+    expect(calculateCapitalGain({ purchasePrice: null, currentValue: 200_000 })).toBeNull();
   });
 });
