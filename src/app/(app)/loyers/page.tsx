@@ -1,10 +1,11 @@
-import { FileText, Mail, Wallet } from "lucide-react";
+import { FileText, ListChecks, Mail, Trash2, Wallet } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { DataTable, type DataTableColumn } from "@/components/shared/data-table";
 import { Pagination } from "@/components/shared/pagination";
 import { RentStatusBadge } from "@/components/shared/rent-status-badge";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { paginate, parsePageParam } from "@/lib/pagination";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,11 +20,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { PaymentDialog } from "@/features/payments/payment-dialog";
+import { PaymentsListDialog } from "@/features/payments/payments-list-dialog";
 import { recordBulkPayments } from "@/features/payments/actions";
 import { ReminderDialog } from "@/features/reminders/reminder-dialog";
 import { getLastRemindersByScheduleIds } from "@/features/reminders/queries";
 import { RentFilters } from "@/features/rent-schedules/rent-filters";
 import { SelectAllCheckbox } from "@/features/rent-schedules/select-all-checkbox";
+import { EditScheduleDialog } from "@/features/rent-schedules/edit-schedule-dialog";
+import { deleteRentSchedule } from "@/features/rent-schedules/actions";
 import { listRentSchedules } from "@/features/rent-schedules/queries";
 import type { RentScheduleWithDetails } from "@/features/rent-schedules/types";
 import type { RentScheduleStatus } from "@/lib/finance";
@@ -137,51 +141,85 @@ export default async function LoyersPage({
     {
       header: "Action",
       className: "text-right",
-      cell: (row) =>
-        row.status === "paid" ? (
-          <Button size="sm" variant="ghost" asChild>
-            <a href={`/api/quittances/${row.id}`} target="_blank" rel="noreferrer">
-              <FileText />
-              Quittance
-            </a>
-          </Button>
-        ) : (
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex justify-end gap-1">
-              <ReminderDialog
-                scheduleId={row.id}
-                lastReminderAt={lastReminderBySchedule.get(row.id)?.created_at ?? null}
-                isRecentReminder={(() => {
-                  const lastAt = lastReminderBySchedule.get(row.id)?.created_at;
-                  if (!lastAt) return false;
-                  const days = (Date.now() - new Date(lastAt).getTime()) / (1000 * 60 * 60 * 24);
-                  return days < RECENT_REMINDER_DAYS;
-                })()}
-                trigger={
-                  <Button size="sm" variant="ghost">
-                    <Mail />
-                    Relancer
-                  </Button>
-                }
-              />
-              <PaymentDialog
-                scheduleId={row.id}
-                remainingDue={row.totalDue - row.totalPaid}
-                trigger={
-                  <Button size="sm" variant="outline">
-                    Enregistrer un paiement
-                  </Button>
-                }
-              />
-            </div>
-            {lastReminderBySchedule.get(row.id) && (
-              <span className="text-xs text-muted-foreground">
-                Relancé le{" "}
-                {formatDate(lastReminderBySchedule.get(row.id)!.created_at)}
-              </span>
+      cell: (row) => (
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex justify-end gap-1">
+            {row.status === "paid" ? (
+              <Button size="sm" variant="ghost" asChild>
+                <a href={`/api/quittances/${row.id}`} target="_blank" rel="noreferrer">
+                  <FileText />
+                  Quittance
+                </a>
+              </Button>
+            ) : (
+              <>
+                <ReminderDialog
+                  scheduleId={row.id}
+                  lastReminderAt={lastReminderBySchedule.get(row.id)?.created_at ?? null}
+                  isRecentReminder={(() => {
+                    const lastAt = lastReminderBySchedule.get(row.id)?.created_at;
+                    if (!lastAt) return false;
+                    const days = (Date.now() - new Date(lastAt).getTime()) / (1000 * 60 * 60 * 24);
+                    return days < RECENT_REMINDER_DAYS;
+                  })()}
+                  trigger={
+                    <Button size="sm" variant="ghost">
+                      <Mail />
+                      Relancer
+                    </Button>
+                  }
+                />
+                <PaymentDialog
+                  scheduleId={row.id}
+                  remainingDue={row.totalDue - row.totalPaid}
+                  trigger={
+                    <Button size="sm" variant="outline">
+                      Enregistrer un paiement
+                    </Button>
+                  }
+                />
+              </>
             )}
           </div>
-        ),
+          {lastReminderBySchedule.get(row.id) && (
+            <span className="text-xs text-muted-foreground">
+              Relancé le {formatDate(lastReminderBySchedule.get(row.id)!.created_at)}
+            </span>
+          )}
+          <div className="flex justify-end gap-1">
+            <PaymentsListDialog
+              payments={row.payments}
+              trigger={
+                <Button size="sm" variant="ghost" aria-label="Voir les paiements">
+                  <ListChecks />
+                </Button>
+              }
+            />
+            <EditScheduleDialog
+              scheduleId={row.id}
+              dueDate={row.due_date}
+              rentAmount={row.rent_amount}
+              chargesAmount={row.charges_amount}
+            />
+            <ConfirmDialog
+              trigger={
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-destructive hover:text-destructive"
+                  aria-label="Supprimer cette échéance"
+                >
+                  <Trash2 />
+                </Button>
+              }
+              title="Supprimer cette échéance ?"
+              description="Cette action est irréversible et supprime aussi les paiements déjà enregistrés sur cette échéance."
+              confirmLabel="Supprimer"
+              action={deleteRentSchedule.bind(null, row.id)}
+            />
+          </div>
+        </div>
+      ),
     },
   ];
 

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "@/features/activity/log";
 import { formatCurrency } from "@/lib/format";
-import { parsePaymentFormData } from "./schema";
+import { parsePaymentFormData, parseUpdatePaymentFormData } from "./schema";
 
 export type PaymentActionState = { error: string | null; success?: boolean };
 
@@ -47,6 +47,55 @@ export async function recordPayment(
   revalidatePath("/loyers");
   revalidatePath("/");
   return { error: null, success: true };
+}
+
+export async function updatePayment(
+  paymentId: string,
+  _prevState: PaymentActionState,
+  formData: FormData
+): Promise<PaymentActionState> {
+  const parsed = parseUpdatePaymentFormData(formData);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("payments").update(parsed.data).eq("id", paymentId);
+
+  if (error) {
+    return { error: GENERIC_ERROR };
+  }
+
+  await logActivity({
+    action: "payment_recorded",
+    entityLabel: `Paiement modifié — ${formatCurrency(parsed.data.amount)}`,
+  });
+
+  revalidatePath("/loyers");
+  revalidatePath("/");
+  return { error: null, success: true };
+}
+
+export async function deletePayment(paymentId: string): Promise<void> {
+  const supabase = await createClient();
+  const { data: payment } = await supabase
+    .from("payments")
+    .select("amount")
+    .eq("id", paymentId)
+    .maybeSingle();
+
+  const { error } = await supabase.from("payments").delete().eq("id", paymentId);
+  if (error) {
+    throw new Error("Impossible de supprimer ce paiement. Réessayez.");
+  }
+
+  await logActivity({
+    action: "payment_recorded",
+    entityLabel: `Paiement supprimé${payment ? ` — ${formatCurrency(payment.amount)}` : ""}`,
+  });
+
+  revalidatePath("/loyers");
+  revalidatePath("/");
 }
 
 /**
