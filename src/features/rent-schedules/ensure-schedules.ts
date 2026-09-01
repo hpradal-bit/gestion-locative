@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { dateAtDay } from "@/lib/scheduling";
 
-const HORIZON_MONTHS = 6;
+const HORIZON_MONTHS = 1;
 
 /**
  * L'application n'a pas de tâche planifiée (budget 0 €/mois, pas de worker
@@ -9,9 +9,9 @@ const HORIZON_MONTHS = 6;
  * seules" avec le temps qui passe. Cette fonction comble ce vide à chaque
  * chargement de l'espace applicatif — pour chaque bail actif, elle
  * prolonge la suite d'échéances jusqu'à `HORIZON_MONTHS` mois dans le
- * futur, en repartant de la dernière échéance connue et en utilisant le
- * loyer/jour de paiement actuels du bail. Idempotente : ne fait rien si
- * la couverture est déjà suffisante.
+ * futur (un seul mois d'avance, jamais plus), en repartant de la dernière
+ * échéance connue et en utilisant le loyer/jour de paiement actuels du
+ * bail. Idempotente : ne fait rien si la couverture est déjà suffisante.
  */
 export async function ensureUpcomingRentSchedules(): Promise<void> {
   const supabase = await createClient();
