@@ -3,17 +3,28 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
-import { parseUploadDocumentFormData } from "./schema";
+import { recordDocumentSchema } from "./schema";
 
 export type DocumentActionState = { error: string | null; success?: boolean };
 
 const GENERIC_ERROR = "Impossible d'importer le document. Vérifiez le fichier puis réessayez.";
 
-export async function uploadDocument(
-  _prevState: DocumentActionState,
-  formData: FormData
-): Promise<DocumentActionState> {
-  const parsed = parseUploadDocumentFormData(formData);
+/**
+ * Enregistre les métadonnées d'un document déjà déposé côté client dans
+ * Supabase Storage (voir upload-dialog.tsx). Le fichier lui-même ne passe
+ * jamais par cette Server Action — uniquement du texte — pour ne pas se
+ * heurter à la limite de 4,5 Mo imposée par Vercel sur le corps des
+ * Functions.
+ */
+export async function recordDocument(input: {
+  entity_type: string;
+  entity_id: string;
+  document_type: string;
+  file_name: string;
+  storage_path: string;
+  size_bytes: number;
+}): Promise<DocumentActionState> {
+  const parsed = recordDocumentSchema.safeParse(input);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
   }
@@ -26,28 +37,18 @@ export async function uploadDocument(
     return { error: GENERIC_ERROR };
   }
 
-  const { entity_type, entity_id, document_type, file } = parsed.data;
-  const storagePath = `${user.id}/${entity_type}/${entity_id}/${Date.now()}-${file.name}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from("documents")
-    .upload(storagePath, file, { contentType: file.type || undefined });
-
-  if (uploadError) {
+  const { storage_path, ...rest } = parsed.data;
+  if (!storage_path.startsWith(`${user.id}/`)) {
     return { error: GENERIC_ERROR };
   }
 
   const { error: insertError } = await supabase.from("documents").insert({
-    entity_type,
-    entity_id,
-    document_type,
-    file_name: file.name,
-    storage_path: storagePath,
-    size_bytes: file.size,
+    ...rest,
+    storage_path,
   });
 
   if (insertError) {
-    await supabase.storage.from("documents").remove([storagePath]);
+    await supabase.storage.from("documents").remove([storage_path]);
     return { error: GENERIC_ERROR };
   }
 

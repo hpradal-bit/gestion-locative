@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useActionState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -23,10 +22,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { uploadDocument } from "./actions";
-import { documentTypes } from "./schema";
+import { createClient } from "@/lib/supabase/client";
+import { recordDocument } from "./actions";
+import { documentFileSchema, documentTypes } from "./schema";
 import { DOCUMENT_TYPE_LABELS } from "./constants";
-import type { documentEntityTypes } from "./schema";
+import type { documentEntityTypes, documentTypes as DocumentTypes } from "./schema";
+
+const GENERIC_ERROR = "Impossible d'importer le document. Vérifiez le fichier puis réessayez.";
 
 type UploadDialogProps = {
   entityType: (typeof documentEntityTypes)[number];
@@ -36,25 +38,78 @@ type UploadDialogProps = {
 
 export function UploadDialog({ entityType, entityId, trigger }: UploadDialogProps) {
   const [open, setOpen] = React.useState(false);
-  const [state, formAction, pending] = useActionState(uploadDocument, { error: null });
+  const [documentType, setDocumentType] = React.useState<(typeof DocumentTypes)[number]>("autres");
+  const [pending, setPending] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const formRef = React.useRef<HTMLFormElement>(null);
 
-  React.useEffect(() => {
-    if (state.success) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+
+    const fileInput = formRef.current?.elements.namedItem("file") as HTMLInputElement | null;
+    const file = fileInput?.files?.[0];
+
+    const parsedFile = documentFileSchema.safeParse(file);
+    if (!parsedFile.success) {
+      setError(parsedFile.error.issues[0]?.message ?? GENERIC_ERROR);
+      return;
+    }
+
+    setPending(true);
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        setError(GENERIC_ERROR);
+        return;
+      }
+
+      const storagePath = `${user.id}/${entityType}/${entityId}/${Date.now()}-${parsedFile.data.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("documents")
+        .upload(storagePath, parsedFile.data, {
+          contentType: parsedFile.data.type || undefined,
+        });
+
+      if (uploadError) {
+        setError(GENERIC_ERROR);
+        return;
+      }
+
+      const result = await recordDocument({
+        entity_type: entityType,
+        entity_id: entityId,
+        document_type: documentType,
+        file_name: parsedFile.data.name,
+        storage_path: storagePath,
+        size_bytes: parsedFile.data.size,
+      });
+
+      if (result.error) {
+        await supabase.storage.from("documents").remove([storagePath]);
+        setError(result.error);
+        return;
+      }
+
       toast.success("Document importé");
       formRef.current?.reset();
-      const id = setTimeout(() => setOpen(false), 0);
-      return () => clearTimeout(id);
+      setDocumentType("autres");
+      setOpen(false);
+    } catch {
+      setError(GENERIC_ERROR);
+    } finally {
+      setPending(false);
     }
-  }, [state]);
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
-        <form ref={formRef} action={formAction} className="flex flex-col gap-4">
-          <input type="hidden" name="entity_type" value={entityType} />
-          <input type="hidden" name="entity_id" value={entityId} />
+        <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4">
           <DialogHeader>
             <DialogTitle>Ajouter un document</DialogTitle>
             <DialogDescription>PDF, image ou autre fichier — 10 Mo maximum.</DialogDescription>
@@ -62,7 +117,10 @@ export function UploadDialog({ entityType, entityId, trigger }: UploadDialogProp
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="document_type">Type de document</Label>
-            <Select name="document_type" defaultValue="autres">
+            <Select
+              value={documentType}
+              onValueChange={(value) => setDocumentType(value as (typeof DocumentTypes)[number])}
+            >
               <SelectTrigger id="document_type" className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -81,9 +139,9 @@ export function UploadDialog({ entityType, entityId, trigger }: UploadDialogProp
             <Input id="file" name="file" type="file" required />
           </div>
 
-          {state.error && (
+          {error && (
             <p className="text-sm text-destructive" role="alert">
-              {state.error}
+              {error}
             </p>
           )}
 
