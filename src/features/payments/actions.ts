@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "@/features/activity/log";
+import { formatCurrency } from "@/lib/format";
 import { parsePaymentFormData } from "./schema";
 
 export type PaymentActionState = { error: string | null; success?: boolean };
@@ -26,6 +28,21 @@ export async function recordPayment(
   if (error) {
     return { error: GENERIC_ERROR };
   }
+
+  const { data: schedule } = await supabase
+    .from("rent_schedules")
+    .select("due_date, leases(properties(name), tenants(first_name, last_name))")
+    .eq("id", parsed.data.rent_schedule_id)
+    .maybeSingle();
+  const tenant = schedule?.leases?.tenants;
+  const property = schedule?.leases?.properties;
+
+  await logActivity({
+    action: "payment_recorded",
+    entityLabel: tenant
+      ? `${tenant.first_name} ${tenant.last_name} — ${property?.name ?? ""} — ${formatCurrency(parsed.data.amount)}`
+      : formatCurrency(parsed.data.amount),
+  });
 
   revalidatePath("/loyers");
   revalidatePath("/");
@@ -76,6 +93,12 @@ export async function recordBulkPayments(formData: FormData): Promise<void> {
 
   // RLS garantit que chaque échéance appartient bien à l'utilisateur courant.
   await supabase.from("payments").insert(newPayments);
+
+  const totalAmount = newPayments.reduce((sum, p) => sum + p.amount, 0);
+  await logActivity({
+    action: "payment_recorded",
+    entityLabel: `Validation groupée — ${newPayments.length} échéance${newPayments.length > 1 ? "s" : ""} — ${formatCurrency(totalAmount)}`,
+  });
 
   revalidatePath("/loyers");
   revalidatePath("/");

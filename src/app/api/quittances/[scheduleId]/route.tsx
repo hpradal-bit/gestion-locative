@@ -3,6 +3,7 @@ import { renderToBuffer } from "@react-pdf/renderer";
 
 import { getReceiptData } from "@/features/receipts/queries";
 import { ReceiptDocument } from "@/features/receipts/receipt-document";
+import { logActivity } from "@/features/activity/log";
 
 export async function GET(
   _request: Request,
@@ -19,6 +20,15 @@ export async function GET(
   }
 
   const buffer = await renderToBuffer(<ReceiptDocument data={data} />);
+
+  const periodLabel = new Date(data.period.dueDate).toLocaleDateString("fr-FR", {
+    month: "long",
+    year: "numeric",
+  });
+  await logActivity({
+    action: "receipt_generated",
+    entityLabel: `${data.tenant.fullName} — ${data.property.name} — ${periodLabel}`,
+  });
 
   return new NextResponse(new Uint8Array(buffer), {
     headers: {

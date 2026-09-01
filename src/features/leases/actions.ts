@@ -5,7 +5,21 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { generateRentSchedules } from "@/lib/scheduling";
+import { logActivity } from "@/features/activity/log";
 import { parseLeaseFormData } from "./schema";
+
+async function describeLease(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  tenantId: string,
+  propertyId: string
+): Promise<string> {
+  const [{ data: tenant }, { data: property }] = await Promise.all([
+    supabase.from("tenants").select("first_name, last_name").eq("id", tenantId).maybeSingle(),
+    supabase.from("properties").select("name").eq("id", propertyId).maybeSingle(),
+  ]);
+  const tenantLabel = tenant ? `${tenant.first_name} ${tenant.last_name}` : "Locataire";
+  return `${tenantLabel} — ${property?.name ?? "Bien"}`;
+}
 
 export type LeaseActionState = { error: string | null };
 
@@ -51,6 +65,11 @@ export async function createLease(
     };
   }
 
+  await logActivity({
+    action: "lease_created",
+    entityLabel: await describeLease(supabase, tenantId, parsed.data.property_id),
+  });
+
   revalidatePath("/loyers");
   revalidatePath(`/locataires/${tenantId}`);
   revalidatePath(`/biens/${parsed.data.property_id}`);
@@ -74,6 +93,11 @@ export async function updateLease(
   if (error) {
     return { error: GENERIC_ERROR };
   }
+
+  await logActivity({
+    action: "lease_updated",
+    entityLabel: await describeLease(supabase, tenantId, parsed.data.property_id),
+  });
 
   // Les échéances déjà générées (parfois déjà payées) ne sont jamais
   // réécrites rétroactivement : un changement de loyer ici ne vaut que

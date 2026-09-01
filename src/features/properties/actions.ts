@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "@/features/activity/log";
 import { parsePropertyFormData } from "./schema";
 
 export type PropertyActionState = { error: string | null };
@@ -34,6 +35,8 @@ export async function createProperty(
   if (error || !data) {
     return { error: GENERIC_ERROR };
   }
+
+  await logActivity({ action: "property_created", entityLabel: parsed.data.name });
 
   revalidatePath("/biens");
   redirect(`/biens/${data.id}`);
@@ -79,6 +82,8 @@ export async function updateProperty(
   if (error) {
     return { error: GENERIC_ERROR };
   }
+
+  await logActivity({ action: "property_updated", entityLabel: parsed.data.name });
 
   revalidatePath("/biens");
   revalidatePath(`/biens/${propertyId}`);

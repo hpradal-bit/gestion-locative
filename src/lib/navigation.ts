@@ -11,6 +11,7 @@ import {
   Calculator,
   FolderOpen,
   Bell,
+  History,
   Settings,
 } from "lucide-react";
 
@@ -34,5 +35,6 @@ export const navItems: NavItem[] = [
   { title: "Simulateur", href: "/simulateur", icon: Calculator },
   { title: "Documents", href: "/documents", icon: FolderOpen },
   { title: "Notifications", href: "/notifications", icon: Bell },
+  { title: "Historique", href: "/historique", icon: History },
   { title: "Paramètres", href: "/parametres", icon: Settings },
 ];

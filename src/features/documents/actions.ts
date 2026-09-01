@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "@/features/activity/log";
 import { recordDocumentSchema } from "./schema";
 
 export type DocumentActionState = { error: string | null; success?: boolean };
@@ -52,6 +53,8 @@ export async function recordDocument(input: {
     return { error: GENERIC_ERROR };
   }
 
+  await logActivity({ action: "document_added", entityLabel: rest.file_name });
+
   revalidatePath("/documents");
   return { error: null, success: true };
 }
@@ -59,12 +62,22 @@ export async function recordDocument(input: {
 export async function deleteDocument(documentId: string, storagePath: string): Promise<void> {
   const supabase = await createClient();
 
+  const { data: document } = await supabase
+    .from("documents")
+    .select("file_name")
+    .eq("id", documentId)
+    .maybeSingle();
+
   const { error } = await supabase.from("documents").delete().eq("id", documentId);
   if (error) {
     throw new Error("Impossible de supprimer ce document. Réessayez.");
   }
 
   await supabase.storage.from("documents").remove([storagePath]);
+  await logActivity({
+    action: "document_deleted",
+    entityLabel: document?.file_name ?? "Document",
+  });
   revalidatePath("/documents");
 }
 

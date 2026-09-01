@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { getEmailProvider } from "@/lib/notifications/resend-provider";
+import { logActivity } from "@/features/activity/log";
 import { buildReminderMessage, type ReminderLevel } from "./templates";
 
 export type ReminderActionState = { error: string | null; success?: boolean };
@@ -73,6 +74,12 @@ export async function sendReminder(
   if (!result.success) {
     return { error: result.error ?? GENERIC_ERROR };
   }
+
+  await logActivity({
+    action: "reminder_sent",
+    entityLabel: `${tenant.first_name} ${tenant.last_name} — ${property.name} — ${schedule.due_date}`,
+    metadata: { level, amount: schedule.rent_amount + schedule.charges_amount },
+  });
 
   return { error: null, success: true };
 }

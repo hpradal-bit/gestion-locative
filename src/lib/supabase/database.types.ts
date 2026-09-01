@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_events: {
+        Row: {
+          action: string
+          created_at: string
+          entity_label: string
+          id: string
+          metadata: Json
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity_label: string
+          id?: string
+          metadata?: Json
+          user_id?: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_label?: string
+          id?: string
+          metadata?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           created_at: string
