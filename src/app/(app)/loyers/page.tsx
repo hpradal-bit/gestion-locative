@@ -7,13 +7,28 @@ import { Pagination } from "@/components/shared/pagination";
 import { RentStatusBadge } from "@/components/shared/rent-status-badge";
 import { paginate, parsePageParam } from "@/lib/pagination";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { PaymentDialog } from "@/features/payments/payment-dialog";
+import { recordBulkPayments } from "@/features/payments/actions";
 import { RentFilters } from "@/features/rent-schedules/rent-filters";
+import { SelectAllCheckbox } from "@/features/rent-schedules/select-all-checkbox";
 import { listRentSchedules } from "@/features/rent-schedules/queries";
 import type { RentScheduleWithDetails } from "@/features/rent-schedules/types";
 import type { RentScheduleStatus } from "@/lib/finance";
 import { listProperties } from "@/features/properties/queries";
 import { formatCurrency } from "@/lib/format";
+
+const BULK_FORM_ID = "bulk-payment-form";
 
 const VALID_STATUSES: RentScheduleStatus[] = ["paid", "pending", "late", "partial"];
 
@@ -40,6 +55,19 @@ export default async function LoyersPage({
     listProperties(),
   ]);
 
+  // Total payé "à vie" par locataire — indépendant des filtres bien/statut
+  // de cette page, pour donner une vraie vision de son historique financier.
+  const hasFilters = Boolean(propertyId || status);
+  const schedulesForTenantTotals = hasFilters ? await listRentSchedules({}) : allSchedules;
+  const totalPaidByTenant = new Map<string, number>();
+  for (const schedule of schedulesForTenantTotals) {
+    if (!schedule.tenantId) continue;
+    totalPaidByTenant.set(
+      schedule.tenantId,
+      (totalPaidByTenant.get(schedule.tenantId) ?? 0) + schedule.totalPaid
+    );
+  }
+
   const hasProperties = properties.length > 0;
   const { items: schedules, currentPage, pageCount, totalCount } = paginate(
     allSchedules,
@@ -47,6 +75,21 @@ export default async function LoyersPage({
   );
 
   const columns: DataTableColumn<RentScheduleWithDetails>[] = [
+    {
+      header: "",
+      className: "w-10",
+      cell: (row) =>
+        row.status === "paid" ? null : (
+          <input
+            type="checkbox"
+            name="scheduleIds"
+            value={row.id}
+            form={BULK_FORM_ID}
+            aria-label={`Sélectionner l'échéance de ${row.tenantName}`}
+            className="size-4 accent-primary"
+          />
+        ),
+    },
     {
       header: "Bien / Locataire",
       cell: (row) => (
@@ -69,6 +112,14 @@ export default async function LoyersPage({
       cell: (row) => (
         <span className={row.totalPaid > 0 ? "" : "text-muted-foreground"}>
           {formatCurrency(row.totalPaid)}
+        </span>
+      ),
+    },
+    {
+      header: "Total payé (locataire)",
+      cell: (row) => (
+        <span className="text-muted-foreground">
+          {row.tenantId ? formatCurrency(totalPaidByTenant.get(row.tenantId) ?? 0) : "—"}
         </span>
       ),
     },
@@ -117,6 +168,38 @@ export default async function LoyersPage({
       ) : (
         <>
           <RentFilters properties={properties} />
+
+          <form id={BULK_FORM_ID} action={recordBulkPayments} />
+
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <SelectAllCheckbox targetName="scheduleIds" />
+              Tout sélectionner
+            </label>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button type="button" size="sm" variant="outline">
+                  Valider les paiements sélectionnés
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Valider les paiements sélectionnés ?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Chaque échéance cochée sera marquée comme intégralement payée, à la date
+                    d&apos;aujourd&apos;hui. Cette action ne peut pas être annulée automatiquement.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction type="submit" form={BULK_FORM_ID}>
+                    Valider
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+
           <div>
             <DataTable
               columns={columns}

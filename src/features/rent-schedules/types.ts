@@ -7,6 +7,7 @@ export type RentScheduleWithDetails = Tables<"rent_schedules"> & {
   totalPaid: number;
   propertyId: string | null;
   propertyName: string;
+  tenantId: string | null;
   tenantName: string;
   leaseId: string;
   payments: Tables<"payments">[];

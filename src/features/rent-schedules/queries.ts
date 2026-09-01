@@ -52,6 +52,7 @@ export async function listRentSchedules(
       totalPaid,
       propertyId: property?.id ?? null,
       propertyName: property?.name ?? "Bien supprimé",
+      tenantId: tenant?.id ?? null,
       tenantName: tenant ? `${tenant.first_name} ${tenant.last_name}` : "Locataire supprimé",
       leaseId: lease?.id ?? "",
       payments: schedulePayments,
