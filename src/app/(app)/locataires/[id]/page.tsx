@@ -158,6 +158,7 @@ export default async function LocataireDetailPage({
                     </>
                   )}
                 </div>
+                <DocumentsSection entityType="lease" entityId={lease.id} />
               </CardContent>
             </Card>
           ))}

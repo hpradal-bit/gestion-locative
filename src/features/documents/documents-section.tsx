@@ -1,4 +1,4 @@
-import { FileText, Plus, Trash2 } from "lucide-react";
+import { FileText, Plus, Sparkles, Trash2 } from "lucide-react";
 
 import {
   Card,
@@ -13,6 +13,7 @@ import { listDocumentsForEntity } from "./queries";
 import { deleteDocument } from "./actions";
 import { UploadDialog } from "./upload-dialog";
 import { DownloadButton } from "./download-button";
+import { AnalyzeDocumentDialog } from "./analyze-document-dialog";
 import { DOCUMENT_TYPE_LABELS } from "./constants";
 import type { documentEntityTypes, documentTypes } from "./schema";
 
@@ -73,6 +74,17 @@ export async function DocumentsSection({
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
+                  {entityType === "lease" && (
+                    <AnalyzeDocumentDialog
+                      documentId={doc.id}
+                      leaseId={entityId}
+                      trigger={
+                        <Button size="sm" variant="ghost" title="Analyser avec l'IA">
+                          <Sparkles />
+                        </Button>
+                      }
+                    />
+                  )}
                   <DownloadButton storagePath={doc.storage_path} />
                   <ConfirmDialog
                     trigger={
