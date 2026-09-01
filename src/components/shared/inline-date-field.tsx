@@ -8,6 +8,15 @@ function isoToFr(iso: string): string {
   return `${day}/${month}/${year}`;
 }
 
+/** Reformate une saisie en cours en "jj/mm/aaaa", en insérant les "/" au fil des chiffres tapés. */
+function formatTypedDigitsAsFr(raw: string): string {
+  const digits = raw.replace(/\D/g, "").slice(0, 8);
+  const day = digits.slice(0, 2);
+  const month = digits.slice(2, 4);
+  const year = digits.slice(4, 8);
+  return [day, month, year].filter(Boolean).join("/");
+}
+
 /** Convertit "jj/mm/aaaa" en "aaaa-mm-jj", ou `null` si la date est invalide. */
 function frToIso(fr: string): string | null {
   const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(fr.trim());
@@ -32,8 +41,9 @@ type InlineDateFieldProps = {
 
 /**
  * Champ date modifiable au clavier, sans passer par un calendrier : on tape
- * jj/mm/aaaa, la date est enregistrée à la validation (Entrée ou perte de
- * focus) — pas de bouton "Enregistrer" ni de dialogue à ouvrir.
+ * les chiffres du jour, du mois puis de l'année, et les "/" s'insèrent
+ * automatiquement. La date est enregistrée à la validation (Entrée ou perte
+ * de focus) — pas de bouton "Enregistrer" ni de dialogue à ouvrir.
  */
 export function InlineDateField({ value, ariaLabel, onSave }: InlineDateFieldProps) {
   const [savedIso, setSavedIso] = React.useState(value);
@@ -80,7 +90,7 @@ export function InlineDateField({ value, ariaLabel, onSave }: InlineDateFieldPro
       aria-label={ariaLabel}
       disabled={isPending}
       className="w-24 rounded-md border border-transparent bg-transparent px-1.5 py-1 text-sm hover:border-input focus:border-input focus:outline-none disabled:opacity-50"
-      onChange={(event) => setText(event.target.value)}
+      onChange={(event) => setText(formatTypedDigitsAsFr(event.target.value))}
       onBlur={commit}
       onKeyDown={(event) => {
         if (event.key === "Enter") {

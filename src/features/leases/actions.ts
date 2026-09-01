@@ -4,9 +4,51 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
-import { generateRentSchedules } from "@/lib/scheduling";
+import { dateAtDay, generateRentSchedules } from "@/lib/scheduling";
 import { logActivity } from "@/features/activity/log";
 import { parseLeaseFormData } from "./schema";
+
+/**
+ * Réaligne le jour d'échéance des échéances futures et non payées sur le
+ * nouveau jour de paiement convenu avec le locataire. Les échéances déjà
+ * réglées (même partiellement) ne sont jamais touchées : seul un jour
+ * d'échéance pas encore honoré peut être corrigé.
+ */
+async function realignFutureUnpaidSchedules(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  leaseId: string,
+  paymentDueDay: number
+): Promise<void> {
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: schedules } = await supabase
+    .from("rent_schedules")
+    .select("id, due_date")
+    .eq("lease_id", leaseId)
+    .gte("due_date", today);
+
+  if (!schedules || schedules.length === 0) return;
+
+  const { data: payments } = await supabase
+    .from("payments")
+    .select("rent_schedule_id")
+    .in(
+      "rent_schedule_id",
+      schedules.map((s) => s.id)
+    );
+  const paidScheduleIds = new Set((payments ?? []).map((p) => p.rent_schedule_id));
+
+  for (const schedule of schedules) {
+    if (paidScheduleIds.has(schedule.id)) continue;
+    const correctedDueDate = dateAtDay(new Date(schedule.due_date), 0, paymentDueDay)
+      .toISOString()
+      .slice(0, 10);
+    if (correctedDueDate === schedule.due_date) continue;
+    await supabase
+      .from("rent_schedules")
+      .update({ due_date: correctedDueDate })
+      .eq("id", schedule.id);
+  }
+}
 
 async function describeLease(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -95,15 +137,16 @@ export async function updateLease(
     return { error: GENERIC_ERROR };
   }
 
+  // Le jour d'échéance des échéances futures et non payées suit le nouveau
+  // jour de paiement convenu. Les échéances déjà réglées (même
+  // partiellement) ne sont jamais réécrites rétroactivement.
+  await realignFutureUnpaidSchedules(supabase, leaseId, parsed.data.payment_due_day);
+
   await logActivity({
     action: "lease_updated",
     entityLabel: await describeLease(supabase, tenantId, parsed.data.property_id),
   });
 
-  // Les échéances déjà générées (parfois déjà payées) ne sont jamais
-  // réécrites rétroactivement : un changement de loyer ici ne vaut que
-  // pour les informations du bail lui-même, pas pour l'historique des
-  // échéances déjà émises.
   revalidatePath("/loyers");
   revalidatePath(`/locataires/${tenantId}`);
   revalidatePath(`/biens/${parsed.data.property_id}`);

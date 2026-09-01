@@ -16,7 +16,7 @@ export function addMonthsClamped(date: Date, months: number): Date {
  * `day` — calé au dernier jour du mois si celui-ci en compte moins (ex :
  * jour 31 en février -> 28/29).
  */
-function dateAtDay(date: Date, monthOffset: number, day: number): Date {
+export function dateAtDay(date: Date, monthOffset: number, day: number): Date {
   const target = new Date(date.getFullYear(), date.getMonth() + monthOffset, 1);
   const lastDayOfMonth = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
   target.setDate(Math.min(day, lastDayOfMonth));
