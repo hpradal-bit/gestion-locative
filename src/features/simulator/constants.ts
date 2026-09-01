@@ -21,6 +21,11 @@ export const DEFAULT_SIMULATION_INPUT: SimulationInput = {
   condoFeesAnnual: 600,
   insuranceAnnual: 200,
   managementFeesAnnual: 0,
+
+  taxRegime: null,
+  tmiRate: 0.3,
+  applySocialCharges: true,
+  annualAmortization: 0,
 };
 
 export const RATING_LABELS: Record<InvestmentRating, string> = {

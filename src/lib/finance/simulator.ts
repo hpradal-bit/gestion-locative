@@ -1,4 +1,4 @@
-import { calculateMonthlyPayment } from "./loan";
+import { calculateAmortizationSchedule, calculateMonthlyPayment } from "./loan";
 import {
   calculateCashFlow,
   calculateGrossYield,
@@ -6,6 +6,7 @@ import {
   calculateReturnOnInvestment,
   calculateTotalProjectCost,
 } from "./property";
+import { estimateTax, type TaxRegime } from "./tax";
 
 export type SimulationInput = {
   purchasePrice: number;
@@ -29,6 +30,13 @@ export type SimulationInput = {
   condoFeesAnnual: number;
   insuranceAnnual: number;
   managementFeesAnnual: number;
+
+  /** null = fiscalité non renseignée, le cash-flow après impôt ne sera pas calculé. */
+  taxRegime: TaxRegime | null;
+  tmiRate: number;
+  applySocialCharges: boolean;
+  /** LMNP réel uniquement. */
+  annualAmortization: number;
 };
 
 export type InvestmentRating = "excellent" | "bon" | "a_etudier" | "risque";
@@ -45,6 +53,11 @@ export type SimulationResult = {
   returnOnInvestment: number;
   score: number;
   rating: InvestmentRating;
+
+  /** null si taxRegime n'est pas renseigné — jamais une fausse estimation à 0. */
+  estimatedAnnualTax: number | null;
+  cashFlowMonthlyAfterTax: number | null;
+  cashFlowAnnualAfterTax: number | null;
 };
 
 /**
@@ -125,6 +138,29 @@ export function runSimulation(input: SimulationInput): SimulationResult {
 
   const score = calculateInvestmentScore({ netYield, cashFlowMonthly });
 
+  // --- Fiscalité (estimation, voir lib/finance/tax.ts) ---
+  let estimatedAnnualTax: number | null = null;
+  if (input.taxRegime) {
+    const schedule = calculateAmortizationSchedule({
+      principal: input.loanAmount,
+      annualInterestRate: input.annualInterestRate,
+      durationMonths: input.durationMonths,
+    });
+    const firstYearInterest = schedule
+      .slice(0, 12)
+      .reduce((sum, row) => sum + row.interest, 0);
+
+    const result = estimateTax({
+      regime: input.taxRegime,
+      grossAnnualRent: nominalAnnualRent,
+      deductibleExpenses: annualRecurringExpenses + firstYearInterest,
+      amortization: input.annualAmortization,
+      tmiRate: input.tmiRate,
+      applySocialCharges: input.applySocialCharges,
+    });
+    estimatedAnnualTax = result.totalTax;
+  }
+
   return {
     totalProjectCost,
     downPaymentRequired: input.downPayment,
@@ -137,5 +173,10 @@ export function runSimulation(input: SimulationInput): SimulationResult {
     returnOnInvestment,
     score,
     rating: ratingFromScore(score),
+    estimatedAnnualTax,
+    cashFlowAnnualAfterTax:
+      estimatedAnnualTax == null ? null : cashFlowAnnual - estimatedAnnualTax,
+    cashFlowMonthlyAfterTax:
+      estimatedAnnualTax == null ? null : cashFlowMonthly - estimatedAnnualTax / 12,
   };
 }

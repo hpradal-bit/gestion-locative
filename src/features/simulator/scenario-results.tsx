@@ -66,9 +66,27 @@ export function ScenarioResults({ result }: { result: SimulationResult }) {
             value={formatCurrency(result.savingsEffort)}
             tone={result.savingsEffort > 0 ? "negative" : undefined}
           />
+          {result.estimatedAnnualTax != null && (
+            <>
+              <Metric label="Impôt estimé (an)" value={formatCurrency(result.estimatedAnnualTax)} />
+              <Metric
+                label="Cash-flow mensuel après impôt"
+                value={formatCurrency(result.cashFlowMonthlyAfterTax!)}
+                tone={result.cashFlowMonthlyAfterTax! >= 0 ? "positive" : "negative"}
+              />
+              <Metric
+                label="Cash-flow annuel après impôt"
+                value={formatCurrency(result.cashFlowAnnualAfterTax!)}
+                tone={result.cashFlowAnnualAfterTax! >= 0 ? "positive" : "negative"}
+              />
+            </>
+          )}
         </div>
         <p className="mt-4 text-xs text-muted-foreground">
           Le score est un indicateur d&apos;aide à la décision, pas une vérité financière absolue.
+          {result.estimatedAnnualTax == null
+            ? " Renseignez un régime fiscal pour estimer le cash-flow après impôt."
+            : " La fiscalité est une estimation, pas un calcul d'impôt officiel."}
         </p>
       </CardContent>
     </Card>

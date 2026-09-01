@@ -20,6 +20,10 @@ const baseInput = {
   condoFeesAnnual: 600,
   insuranceAnnual: 200,
   managementFeesAnnual: 0,
+  taxRegime: null,
+  tmiRate: 0.3,
+  applySocialCharges: true,
+  annualAmortization: 0,
 };
 
 describe("runSimulation", () => {
@@ -47,6 +51,21 @@ describe("runSimulation", () => {
     const low = runSimulation(baseInput);
     const high = runSimulation({ ...baseInput, monthlyRent: 1_800 });
     expect(high.score).toBeGreaterThan(low.score);
+  });
+
+  it("ne calcule pas d'impôt si aucun régime fiscal n'est renseigné", () => {
+    const result = runSimulation(baseInput);
+    expect(result.estimatedAnnualTax).toBeNull();
+    expect(result.cashFlowAnnualAfterTax).toBeNull();
+  });
+
+  it("estime l'impôt et le cash-flow après impôt quand un régime est renseigné", () => {
+    const result = runSimulation({ ...baseInput, taxRegime: "micro_foncier" });
+    expect(result.estimatedAnnualTax).not.toBeNull();
+    expect(result.cashFlowAnnualAfterTax).toBeCloseTo(
+      result.cashFlowAnnual - result.estimatedAnnualTax!,
+      5
+    );
   });
 });
 

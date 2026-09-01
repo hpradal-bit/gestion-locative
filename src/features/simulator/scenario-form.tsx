@@ -1,8 +1,17 @@
 "use client";
 
 import type { SimulationInput } from "@/lib/finance";
+import { taxRegimes } from "@/lib/finance/tax";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { MoneyInput } from "@/components/shared/money-input";
 import {
   Card,
@@ -10,8 +19,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { TAX_REGIME_LABELS } from "@/features/properties/constants";
+
+const TMI_OPTIONS = [0, 0.11, 0.3, 0.41, 0.45] as const;
+const TMI_LABELS: Record<(typeof TMI_OPTIONS)[number], string> = {
+  0: "0 % (non imposable)",
+  0.11: "11 %",
+  0.3: "30 %",
+  0.41: "41 %",
+  0.45: "45 %",
+};
+
+const NO_REGIME = "none";
 
 type Field = keyof SimulationInput;
+/** money()/number() ne sont jamais appelés qu'avec des champs numériques. */
+type NumericField = Exclude<Field, "taxRegime" | "applySocialCharges">;
 
 type ScenarioFormProps = {
   title: string;
@@ -21,11 +44,11 @@ type ScenarioFormProps = {
 };
 
 export function ScenarioForm({ title, value, onChange, idPrefix }: ScenarioFormProps) {
-  function set(field: Field, raw: string) {
+  function set(field: NumericField, raw: string) {
     onChange({ ...value, [field]: Number(raw) || 0 });
   }
 
-  function money(field: Field, label: string) {
+  function money(field: NumericField, label: string) {
     const id = `${idPrefix}-${field}`;
     return (
       <div className="flex flex-col gap-2">
@@ -35,7 +58,7 @@ export function ScenarioForm({ title, value, onChange, idPrefix }: ScenarioFormP
     );
   }
 
-  function number(field: Field, label: string, step = "1") {
+  function number(field: NumericField, label: string, step = "1") {
     const id = `${idPrefix}-${field}`;
     return (
       <div className="flex flex-col gap-2">
@@ -104,6 +127,71 @@ export function ScenarioForm({ title, value, onChange, idPrefix }: ScenarioFormP
             {money("condoFeesAnnual", "Copropriété")}
             {money("insuranceAnnual", "Assurance")}
             {money("managementFeesAnnual", "Gestion")}
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-3 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            Fiscalité (estimation)
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2 col-span-2">
+              <Label htmlFor={`${idPrefix}-taxRegime`}>Régime fiscal</Label>
+              <Select
+                value={value.taxRegime ?? NO_REGIME}
+                onValueChange={(v) =>
+                  onChange({ ...value, taxRegime: v === NO_REGIME ? null : (v as SimulationInput["taxRegime"]) })
+                }
+              >
+                <SelectTrigger id={`${idPrefix}-taxRegime`} className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_REGIME}>Non renseigné</SelectItem>
+                  {taxRegimes.map((regime) => (
+                    <SelectItem key={regime} value={regime}>
+                      {TAX_REGIME_LABELS[regime]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {value.taxRegime && (
+              <>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor={`${idPrefix}-tmiRate`}>TMI</Label>
+                  <Select
+                    value={String(value.tmiRate)}
+                    onValueChange={(v) => onChange({ ...value, tmiRate: Number(v) })}
+                  >
+                    <SelectTrigger id={`${idPrefix}-tmiRate`} className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TMI_OPTIONS.map((rate) => (
+                        <SelectItem key={rate} value={String(rate)}>
+                          {TMI_LABELS[rate]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Label
+                  htmlFor={`${idPrefix}-applySocialCharges`}
+                  className="flex items-center gap-2 rounded-md border p-3 font-normal"
+                >
+                  <Checkbox
+                    id={`${idPrefix}-applySocialCharges`}
+                    checked={value.applySocialCharges}
+                    onCheckedChange={(checked) =>
+                      onChange({ ...value, applySocialCharges: checked === true })
+                    }
+                  />
+                  Prélèvements sociaux (17,2 %)
+                </Label>
+                {value.taxRegime === "lmnp_reel" && money("annualAmortization", "Amortissement annuel estimé")}
+              </>
+            )}
           </div>
         </div>
       </CardContent>
