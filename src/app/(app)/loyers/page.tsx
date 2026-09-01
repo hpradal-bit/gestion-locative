@@ -27,7 +27,8 @@ import { getLastRemindersByScheduleIds } from "@/features/reminders/queries";
 import { RentFilters } from "@/features/rent-schedules/rent-filters";
 import { SelectAllCheckbox } from "@/features/rent-schedules/select-all-checkbox";
 import { EditScheduleDialog } from "@/features/rent-schedules/edit-schedule-dialog";
-import { deleteRentSchedule, updateRentScheduleDueDate } from "@/features/rent-schedules/actions";
+import { deleteRentSchedule } from "@/features/rent-schedules/actions";
+import { updatePaymentDate } from "@/features/payments/actions";
 import { InlineDateField } from "@/components/shared/inline-date-field";
 import { listRentSchedules } from "@/features/rent-schedules/queries";
 import type { RentScheduleWithDetails } from "@/features/rent-schedules/types";
@@ -113,13 +114,7 @@ export default async function LoyersPage({
     },
     {
       header: "Échéance",
-      cell: (row) => (
-        <InlineDateField
-          value={row.due_date}
-          ariaLabel={`Date d'échéance de ${row.tenantName}`}
-          onSave={updateRentScheduleDueDate.bind(null, row.id)}
-        />
-      ),
+      cell: (row) => formatDate(row.due_date),
     },
     {
       header: "Montant dû",
@@ -143,7 +138,28 @@ export default async function LoyersPage({
     },
     {
       header: "Statut",
-      cell: (row) => <RentStatusBadge status={row.status} />,
+      cell: (row) => {
+        const lastPayment = row.payments.reduce<(typeof row.payments)[number] | null>(
+          (latest, payment) =>
+            !latest || payment.paid_at > latest.paid_at ? payment : latest,
+          null
+        );
+        return (
+          <div className="flex flex-col gap-1">
+            <RentStatusBadge status={row.status} />
+            {lastPayment && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <span>Payé le :</span>
+                <InlineDateField
+                  value={lastPayment.paid_at}
+                  ariaLabel={`Date de paiement de ${row.tenantName}`}
+                  onSave={updatePaymentDate.bind(null, lastPayment.id)}
+                />
+              </div>
+            )}
+          </div>
+        );
+      },
     },
     {
       header: "Action",
