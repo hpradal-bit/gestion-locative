@@ -1,8 +1,10 @@
+import Link from "next/link";
 import {
   Banknote,
   Building2,
   Landmark,
   LayoutDashboard,
+  Plus,
   TrendingUp,
   Users,
   Wallet,
@@ -13,6 +15,8 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { KpiCard } from "@/components/shared/kpi-card";
 import { ChartCard } from "@/components/shared/chart-card";
 import { AlertsCard } from "@/components/shared/alerts-card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { RevenueChart } from "@/components/charts/revenue-chart";
 import { CashFlowChart } from "@/components/charts/cashflow-chart";
 import { ExpenseBreakdownChart } from "@/components/charts/expense-breakdown-chart";
@@ -77,17 +81,20 @@ export default async function DashboardPage({ searchParams }: PageProps<"/">) {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
+          href="/biens"
           label="Prix total d'achat"
           value={formatCurrency(data.totalPurchasePrice)}
           icon={Building2}
           hint={`${data.propertiesCount} bien${data.propertiesCount > 1 ? "s" : ""}`}
         />
         <KpiCard
+          href="/biens"
           label="Valorisation actuelle totale"
           value={formatCurrency(data.totalCurrentValue)}
           icon={Building2}
         />
         <KpiCard
+          href="/biens"
           label="Plus-value potentielle"
           value={data.totalCapitalGain == null ? "—" : formatCurrency(data.totalCapitalGain)}
           icon={TrendingUp}
@@ -101,56 +108,66 @@ export default async function DashboardPage({ searchParams }: PageProps<"/">) {
           hint={data.totalCapitalGain == null ? "Aucune valorisation estimée" : undefined}
         />
         <KpiCard
+          href="/locataires"
           label="Locataires actifs"
           value={String(data.activeTenantsCount)}
           icon={Users}
         />
         <KpiCard
+          href="/loyers"
           label="Loyers mensuels"
           value={formatCurrency(data.monthlyRentTotal)}
           icon={Wallet}
           hint={`${formatCurrency(data.annualRentTotal)} / an`}
         />
         <KpiCard
+          href="/rentabilite"
           label="Rentabilité moyenne"
           value={formatPercent(data.averageGrossYield)}
           icon={TrendingUp}
         />
         <KpiCard
+          href="/loyers?statut=paid"
           label="Loyers encaissés (mois)"
           value={formatCurrency(data.rentCollectedThisMonth)}
           icon={Banknote}
           tone="positive"
         />
         <KpiCard
+          href="/loyers?statut=pending"
           label="Loyers en attente"
           value={formatCurrency(data.rentPendingThisMonth)}
           icon={Wallet}
         />
         <KpiCard
+          href="/loyers?statut=late"
           label="Impayés"
           value={formatCurrency(data.rentLateAmount)}
           icon={Wallet}
           tone={data.rentLateAmount > 0 ? "negative" : "default"}
         />
         <KpiCard
+          href="/financements"
           label="Mensualités de crédits"
           value={formatCurrency(data.monthlyLoanPayments)}
           icon={Landmark}
         />
         <KpiCard
+          href="/rentabilite"
           label="Cash-flow mensuel (avant impôt)"
           value={formatCurrency(data.cashFlowMonthly)}
           icon={Wallet}
           tone={data.cashFlowMonthly >= 0 ? "positive" : "negative"}
         />
         <KpiCard
+          href="/rentabilite"
           label="Cash-flow annuel (avant impôt)"
           value={formatCurrency(data.cashFlowAnnual)}
           icon={Wallet}
           tone={data.cashFlowAnnual >= 0 ? "positive" : "negative"}
         />
         <KpiCard
+          href="/biens"
           label="Impôt estimé (12 mois)"
           value={data.estimatedAnnualTax == null ? "—" : formatCurrency(data.estimatedAnnualTax)}
           icon={Landmark}
@@ -163,6 +180,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/">) {
           }
         />
         <KpiCard
+          href="/rentabilite"
           label="Cash-flow annuel après impôt"
           value={
             data.cashFlowAnnualAfterTax == null
@@ -179,18 +197,42 @@ export default async function DashboardPage({ searchParams }: PageProps<"/">) {
           }
         />
         <KpiCard
+          href="/depenses"
           label="Dépenses (mois)"
           value={formatCurrency(data.monthlyExpenses)}
           icon={Wallet}
         />
         <KpiCard
+          href="/depenses"
           label="Dépenses (12 mois)"
           value={formatCurrency(data.annualExpenses)}
           icon={Wallet}
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+        <Card className="rounded-2xl">
+          <CardHeader>
+            <CardTitle>Actions rapides</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            <Button asChild className="rounded-full">
+              <Link href="/biens/nouveau">
+                <Plus />
+                Ajouter un bien
+              </Link>
+            </Button>
+            <Button asChild variant="secondary" className="rounded-full">
+              <Link href="/locataires/nouveau">
+                <Plus />
+                Nouveau locataire
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="rounded-full">
+              <Link href="/loyers">Encaisser un loyer</Link>
+            </Button>
+          </CardContent>
+        </Card>
         <AlertsCard alerts={data.alerts} />
         <ChartCard
           title="Revenus"

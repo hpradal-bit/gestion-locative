@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -20,7 +21,7 @@ export function ChartCard({
   className,
 }: ChartCardProps) {
   return (
-    <Card className={className}>
+    <Card className={cn("rounded-2xl", className)}>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         {description && <CardDescription>{description}</CardDescription>}

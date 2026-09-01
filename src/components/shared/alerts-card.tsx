@@ -13,7 +13,7 @@ const LEVEL_CONFIG = {
 
 export function AlertsCard({ alerts }: { alerts: DashboardAlert[] }) {
   return (
-    <Card>
+    <Card className="rounded-2xl">
       <CardHeader>
         <CardTitle>Alertes</CardTitle>
       </CardHeader>
