@@ -1,4 +1,4 @@
-import { FileText, Wallet } from "lucide-react";
+import { FileText, Mail, Wallet } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { PaymentDialog } from "@/features/payments/payment-dialog";
 import { recordBulkPayments } from "@/features/payments/actions";
+import { ReminderDialog } from "@/features/reminders/reminder-dialog";
+import { getLastRemindersByScheduleIds } from "@/features/reminders/queries";
 import { RentFilters } from "@/features/rent-schedules/rent-filters";
 import { SelectAllCheckbox } from "@/features/rent-schedules/select-all-checkbox";
 import { listRentSchedules } from "@/features/rent-schedules/queries";
@@ -29,6 +31,7 @@ import { listProperties } from "@/features/properties/queries";
 import { formatCurrency } from "@/lib/format";
 
 const BULK_FORM_ID = "bulk-payment-form";
+const RECENT_REMINDER_DAYS = 3;
 
 const VALID_STATUSES: RentScheduleStatus[] = ["paid", "pending", "late", "partial"];
 
@@ -72,6 +75,10 @@ export default async function LoyersPage({
   const { items: schedules, currentPage, pageCount, totalCount } = paginate(
     allSchedules,
     parsePageParam(params.page)
+  );
+
+  const lastReminderBySchedule = await getLastRemindersByScheduleIds(
+    schedules.map((s) => s.id)
   );
 
   const columns: DataTableColumn<RentScheduleWithDetails>[] = [
@@ -139,15 +146,41 @@ export default async function LoyersPage({
             </a>
           </Button>
         ) : (
-          <PaymentDialog
-            scheduleId={row.id}
-            remainingDue={row.totalDue - row.totalPaid}
-            trigger={
-              <Button size="sm" variant="outline">
-                Enregistrer un paiement
-              </Button>
-            }
-          />
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex justify-end gap-1">
+              <ReminderDialog
+                scheduleId={row.id}
+                lastReminderAt={lastReminderBySchedule.get(row.id)?.created_at ?? null}
+                isRecentReminder={(() => {
+                  const lastAt = lastReminderBySchedule.get(row.id)?.created_at;
+                  if (!lastAt) return false;
+                  const days = (Date.now() - new Date(lastAt).getTime()) / (1000 * 60 * 60 * 24);
+                  return days < RECENT_REMINDER_DAYS;
+                })()}
+                trigger={
+                  <Button size="sm" variant="ghost">
+                    <Mail />
+                    Relancer
+                  </Button>
+                }
+              />
+              <PaymentDialog
+                scheduleId={row.id}
+                remainingDue={row.totalDue - row.totalPaid}
+                trigger={
+                  <Button size="sm" variant="outline">
+                    Enregistrer un paiement
+                  </Button>
+                }
+              />
+            </div>
+            {lastReminderBySchedule.get(row.id) && (
+              <span className="text-xs text-muted-foreground">
+                Relancé le{" "}
+                {formatDate(lastReminderBySchedule.get(row.id)!.created_at)}
+              </span>
+            )}
+          </div>
         ),
     },
   ];

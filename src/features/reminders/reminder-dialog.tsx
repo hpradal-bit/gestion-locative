@@ -33,10 +33,17 @@ const LEVEL_LABELS: Record<string, string> = {
 export function ReminderDialog({
   scheduleId,
   trigger,
+  lastReminderAt,
+  isRecentReminder = false,
 }: {
   scheduleId: string;
   trigger: React.ReactNode;
+  /** Date d'envoi de la dernière relance sur cette échéance, si connue. */
+  lastReminderAt?: string | null;
+  /** Calculé côté serveur (< 3 jours) pour éviter un Date.now() impur pendant le rendu client. */
+  isRecentReminder?: boolean;
 }) {
+  const isRecent = isRecentReminder;
   const [open, setOpen] = React.useState(false);
   const [state, formAction, pending] = useActionState(sendReminder, { error: null });
 
@@ -60,6 +67,20 @@ export function ReminderDialog({
               Choisissez le niveau de relance adapté à la situation.
             </DialogDescription>
           </DialogHeader>
+
+          {lastReminderAt && (
+            <p
+              className={
+                isRecent
+                  ? "rounded-md bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400"
+                  : "text-sm text-muted-foreground"
+              }
+            >
+              {isRecent ? "⚠️ " : ""}Dernière relance envoyée le{" "}
+              {new Date(lastReminderAt).toLocaleDateString("fr-FR")}
+              {isRecent ? " — il y a moins de 3 jours." : "."}
+            </p>
+          )}
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="level">Niveau de relance</Label>
