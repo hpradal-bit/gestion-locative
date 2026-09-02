@@ -62,6 +62,7 @@ function emptyDashboardData(): DashboardData {
       loansEndingSoonCount: 0,
       leasesEndingSoonCount: 0,
     }),
+    upcomingEvents: [],
   };
 }
 
@@ -234,6 +235,53 @@ export async function getDashboardData(propertyId?: string): Promise<DashboardDa
     );
     return daysRemaining >= 0 && daysRemaining <= LEASE_ENDING_SOON_DAYS;
   }).length;
+
+  // --- Échéances à venir (bloc "Échéances" du dashboard) ---
+  const propertyNameById = new Map(propertyRows.map((p) => [p.id, p.name]));
+  const upcomingEvents: DashboardData["upcomingEvents"] = [];
+
+  const tenantsWithRentDueThisMonth = new Set<string>();
+  for (const schedule of scheduleRows) {
+    const totalDue = schedule.rent_amount + schedule.charges_amount;
+    const totalPaid = paidByScheduleId.get(schedule.id) ?? 0;
+    const dueDate = new Date(schedule.due_date);
+    const status = computeRentScheduleStatus({ dueDate, totalDue, totalPaid, today: now });
+    if (monthKey(dueDate) === currentMonthKey && (status === "pending" || status === "late")) {
+      tenantsWithRentDueThisMonth.add(schedule.lease_id);
+    }
+  }
+  if (tenantsWithRentDueThisMonth.size > 0) {
+    const count = tenantsWithRentDueThisMonth.size;
+    upcomingEvents.push({
+      id: "rent-due",
+      label: `Loyer de ${formatMonthLabel(currentMonthKey).toLowerCase()}`,
+      sublabel: `${count} locataire${count > 1 ? "s" : ""} — dû`,
+    });
+  }
+
+  for (const lease of leaseRows) {
+    if (!lease.end_date) continue;
+    const daysRemaining = Math.floor(
+      (new Date(lease.end_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (daysRemaining < 0 || daysRemaining > LEASE_ENDING_SOON_DAYS) continue;
+    upcomingEvents.push({
+      id: `lease-${lease.id}`,
+      label: `Bail — ${propertyNameById.get(lease.property_id) ?? "Bien"}`,
+      sublabel: `se termine le ${new Date(lease.end_date).toLocaleDateString("fr-FR")}`,
+    });
+  }
+
+  for (const loan of loanRows) {
+    const monthsElapsed = monthsBetween(new Date(loan.start_date), now);
+    const monthsRemaining = loan.duration_months - monthsElapsed;
+    if (monthsRemaining <= 0 || monthsRemaining > 6) continue;
+    upcomingEvents.push({
+      id: `loan-${loan.id}`,
+      label: `Crédit — ${propertyNameById.get(loan.property_id) ?? "Bien"}`,
+      sublabel: `se termine dans ${monthsRemaining} mois`,
+    });
+  }
 
   // --- Cash-flow & rentabilité ---
   const cashFlowMonthly = calculateCashFlow({
@@ -425,6 +473,7 @@ export async function getDashboardData(propertyId?: string): Promise<DashboardDa
       loansEndingSoonCount,
       leasesEndingSoonCount,
     }),
+    upcomingEvents,
   };
 }
 

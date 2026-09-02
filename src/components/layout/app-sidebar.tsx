@@ -8,6 +8,7 @@ import { ChevronsLeft, ChevronsRight, Home } from "lucide-react";
 import { navItems } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Tooltip,
   TooltipContent,
@@ -21,7 +22,12 @@ function getInitialCollapsed() {
   return window.localStorage.getItem(COLLAPSE_STORAGE_KEY) === "1";
 }
 
-export function AppSidebar() {
+function initialsFromEmail(email: string | null) {
+  if (!email) return "?";
+  return email.slice(0, 2).toUpperCase();
+}
+
+export function AppSidebar({ userEmail = null }: { userEmail?: string | null }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = React.useState(getInitialCollapsed);
 
@@ -94,6 +100,24 @@ export function AppSidebar() {
       </nav>
 
       <div className="border-t border-sidebar-border p-2">
+        <div
+          className={cn(
+            "flex items-center gap-2 rounded-md px-1 py-1.5",
+            collapsed && "justify-center px-0"
+          )}
+        >
+          <Avatar className="size-8 shrink-0">
+            <AvatarFallback>{initialsFromEmail(userEmail)}</AvatarFallback>
+          </Avatar>
+          {!collapsed && (
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium">Propriétaire</p>
+              <p className="truncate text-xs text-sidebar-foreground/60">
+                {userEmail ?? ""}
+              </p>
+            </div>
+          )}
+        </div>
         <Button
           variant="ghost"
           size="sm"

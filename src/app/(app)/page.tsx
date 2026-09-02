@@ -15,14 +15,17 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { KpiCard } from "@/components/shared/kpi-card";
 import { ChartCard } from "@/components/shared/chart-card";
 import { AlertsCard } from "@/components/shared/alerts-card";
+import { UpcomingEventsCard } from "@/components/shared/upcoming-events-card";
+import { ExpenseBreakdownList } from "@/components/shared/expense-breakdown-list";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RevenueChart } from "@/components/charts/revenue-chart";
 import { CashFlowChart } from "@/components/charts/cashflow-chart";
-import { ExpenseBreakdownChart } from "@/components/charts/expense-breakdown-chart";
 import { RemainingPrincipalChart } from "@/components/charts/remaining-principal-chart";
 import { getDashboardData } from "@/features/dashboard/queries";
 import { listProperties } from "@/features/properties/queries";
+import { listTenants } from "@/features/tenants/queries";
+import { QuickLeaseCard } from "@/features/leases/quick-lease-card";
 import { DashboardFilters } from "@/features/dashboard/dashboard-filters";
 import { formatMonthLabel } from "@/lib/date-utils";
 import { formatCurrency, formatPercent } from "@/lib/format";
@@ -31,8 +34,9 @@ export default async function DashboardPage({ searchParams }: PageProps<"/">) {
   const params = await searchParams;
   const propertyId = typeof params.bien === "string" ? params.bien : undefined;
 
-  const [properties, data] = await Promise.all([
+  const [properties, tenants, data] = await Promise.all([
     listProperties(),
+    listTenants(),
     getDashboardData(propertyId),
   ]);
 
@@ -118,7 +122,11 @@ export default async function DashboardPage({ searchParams }: PageProps<"/">) {
           label="Loyers mensuels"
           value={formatCurrency(data.monthlyRentTotal)}
           icon={Wallet}
-          hint={`${formatCurrency(data.annualRentTotal)} / an`}
+          hint={
+            data.monthlyRentTotal > 0
+              ? `${formatPercent((data.rentCollectedThisMonth / data.monthlyRentTotal) * 100, 0)} collecté ce mois-ci`
+              : `${formatCurrency(data.annualRentTotal)} / an`
+          }
         />
         <KpiCard
           href="/rentabilite"
@@ -233,13 +241,24 @@ export default async function DashboardPage({ searchParams }: PageProps<"/">) {
             </Button>
           </CardContent>
         </Card>
+        <QuickLeaseCard properties={properties} tenants={tenants} />
+        <UpcomingEventsCard events={data.upcomingEvents} />
         <AlertsCard alerts={data.alerts} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <ChartCard
           title="Revenus"
           description="Loyers encaissés sur les 12 derniers mois"
           className="lg:col-span-2"
         >
           <RevenueChart data={revenueData} />
+        </ChartCard>
+        <ChartCard
+          title="Capital restant dû"
+          description="Sur les crédits en cours"
+        >
+          <RemainingPrincipalChart data={remainingPrincipalData} />
         </ChartCard>
       </div>
 
@@ -255,21 +274,14 @@ export default async function DashboardPage({ searchParams }: PageProps<"/">) {
           description="12 derniers mois, par catégorie"
         >
           {data.expenseBreakdown.length > 0 ? (
-            <ExpenseBreakdownChart data={data.expenseBreakdown} />
+            <ExpenseBreakdownList data={data.expenseBreakdown} />
           ) : (
-            <p className="flex h-[260px] items-center justify-center text-sm text-muted-foreground">
+            <p className="flex h-[120px] items-center justify-center text-sm text-muted-foreground">
               Aucune dépense enregistrée sur la période.
             </p>
           )}
         </ChartCard>
       </div>
-
-      <ChartCard
-        title="Capital restant dû"
-        description="Évolution cumulée du capital restant sur les crédits en cours"
-      >
-        <RemainingPrincipalChart data={remainingPrincipalData} />
-      </ChartCard>
     </div>
   );
 }

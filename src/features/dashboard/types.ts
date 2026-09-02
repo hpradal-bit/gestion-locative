@@ -17,6 +17,12 @@ export type ExpenseCategoryAmount = {
   amount: number;
 };
 
+export type UpcomingEvent = {
+  id: string;
+  label: string;
+  sublabel: string;
+};
+
 export type DashboardData = {
   propertiesCount: number;
   activeTenantsCount: number;
@@ -58,4 +64,5 @@ export type DashboardData = {
   remainingPrincipalSeries: MonthlyAmount[];
 
   alerts: DashboardAlert[];
+  upcomingEvents: UpcomingEvent[];
 };

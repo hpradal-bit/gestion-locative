@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
 import { dateAtDay, generateRentSchedules } from "@/lib/scheduling";
@@ -117,6 +118,84 @@ export async function createLease(
   revalidatePath(`/locataires/${tenantId}`);
   revalidatePath(`/biens/${parsed.data.property_id}`);
   redirect(`/locataires/${tenantId}`);
+}
+
+const quickLeaseSchema = z.object({
+  property_id: z.string().uuid("Sélectionnez un bien."),
+  tenant_id: z.string().uuid("Sélectionnez un locataire."),
+});
+
+export type QuickLeaseActionState = { error: string | null; success?: boolean };
+
+/**
+ * Création rapide de bail depuis le dashboard : loyer et charges toujours
+ * repris du bien choisi (jamais saisis à la main ici), bail démarrant
+ * aujourd'hui, jour de paiement par défaut — modifiables ensuite depuis la
+ * fiche du bail comme n'importe quel autre bail.
+ */
+export async function quickCreateLease(
+  _prevState: QuickLeaseActionState,
+  formData: FormData
+): Promise<QuickLeaseActionState> {
+  const parsed = quickLeaseSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? GENERIC_ERROR };
+  }
+
+  const supabase = await createClient();
+  const { data: property } = await supabase
+    .from("properties")
+    .select("monthly_rent, monthly_charges")
+    .eq("id", parsed.data.property_id)
+    .maybeSingle();
+
+  if (!property) {
+    return { error: GENERIC_ERROR };
+  }
+
+  const { data: lease, error } = await supabase
+    .from("leases")
+    .insert({
+      property_id: parsed.data.property_id,
+      tenant_id: parsed.data.tenant_id,
+      start_date: new Date().toISOString().slice(0, 10),
+      initial_rent: property.monthly_rent,
+      charges: property.monthly_charges,
+      payment_due_day: 1,
+    })
+    .select("id, start_date, initial_rent, charges, payment_due_day")
+    .single();
+
+  if (error || !lease) {
+    return { error: GENERIC_ERROR };
+  }
+
+  const schedules = generateRentSchedules({
+    startDate: new Date(lease.start_date),
+    paymentDueDay: lease.payment_due_day,
+    rentAmount: lease.initial_rent,
+    chargesAmount: lease.charges,
+    count: INITIAL_SCHEDULE_COUNT,
+  }).map((schedule) => ({ ...schedule, lease_id: lease.id }));
+
+  const { error: scheduleError } = await supabase.from("rent_schedules").insert(schedules);
+  if (scheduleError) {
+    return {
+      error:
+        "Le bail a été créé mais les échéances n'ont pas pu être générées. Contactez le support.",
+    };
+  }
+
+  await logActivity({
+    action: "lease_created",
+    entityLabel: await describeLease(supabase, parsed.data.tenant_id, parsed.data.property_id),
+  });
+
+  revalidatePath("/loyers");
+  revalidatePath("/");
+  revalidatePath(`/locataires/${parsed.data.tenant_id}`);
+  revalidatePath(`/biens/${parsed.data.property_id}`);
+  return { error: null, success: true };
 }
 
 export async function updateLease(

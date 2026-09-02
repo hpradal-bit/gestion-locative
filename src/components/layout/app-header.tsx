@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, Search } from "lucide-react";
+import { Bell, Plus, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +27,14 @@ export function AppHeader() {
         />
       </div>
 
-      <div className="ml-auto flex items-center gap-1">
+      <div className="ml-auto flex items-center gap-2">
+        <Button asChild size="sm" className="hidden rounded-full sm:inline-flex">
+          <Link href="/biens/nouveau">
+            <Plus />
+            Ajouter un bien
+          </Link>
+        </Button>
+
         <ThemeToggle />
 
         <Button variant="ghost" size="icon" className="relative" asChild>
