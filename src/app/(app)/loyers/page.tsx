@@ -77,14 +77,25 @@ export default async function LoyersPage({
     );
   }
 
+  // "À venir" : les échéances du mois prochain, générées une seule à la fois
+  // (voir ensureUpcomingRentSchedules) — affichées à part tant qu'on n'est
+  // pas encore dans leur mois, puis rejoignent naturellement la liste
+  // principale une fois ce mois entamé.
+  const now = new Date();
+  const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    .toISOString()
+    .slice(0, 10);
+  const upcomingSchedules = allSchedules.filter((s) => s.due_date > currentMonthEnd);
+  const currentSchedules = allSchedules.filter((s) => s.due_date <= currentMonthEnd);
+
   const hasProperties = properties.length > 0;
   const { items: schedules, currentPage, pageCount, totalCount } = paginate(
-    allSchedules,
+    currentSchedules,
     parsePageParam(params.page)
   );
 
   const lastReminderBySchedule = await getLastRemindersByScheduleIds(
-    schedules.map((s) => s.id)
+    [...schedules, ...upcomingSchedules].map((s) => s.id)
   );
 
   const columns: DataTableColumn<RentScheduleWithDetails>[] = [
@@ -264,6 +275,18 @@ export default async function LoyersPage({
           <RentFilters properties={properties} />
 
           <form id={BULK_FORM_ID} action={recordBulkPayments} />
+
+          {upcomingSchedules.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <h2 className="text-sm font-semibold text-muted-foreground">À venir</h2>
+              <DataTable
+                columns={columns}
+                rows={upcomingSchedules}
+                rowKey={(row) => row.id}
+                emptyMessage="Aucune échéance à venir."
+              />
+            </div>
+          )}
 
           <div className="flex items-center gap-3">
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
