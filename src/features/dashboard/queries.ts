@@ -60,6 +60,7 @@ function emptyDashboardData(): DashboardData {
       propertiesCount: 0,
       lateRentCount: 0,
       loansEndingSoonCount: 0,
+      leasesEndingSoonCount: 0,
     }),
   };
 }
@@ -222,6 +223,16 @@ export async function getDashboardData(propertyId?: string): Promise<DashboardDa
     const monthsElapsed = monthsBetween(new Date(loan.start_date), now);
     const monthsRemaining = loan.duration_months - monthsElapsed;
     return monthsRemaining > 0 && monthsRemaining <= 6;
+  }).length;
+
+  // --- Baux ---
+  const LEASE_ENDING_SOON_DAYS = 90;
+  const leasesEndingSoonCount = leaseRows.filter((lease) => {
+    if (!lease.end_date) return false;
+    const daysRemaining = Math.floor(
+      (new Date(lease.end_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return daysRemaining >= 0 && daysRemaining <= LEASE_ENDING_SOON_DAYS;
   }).length;
 
   // --- Cash-flow & rentabilité ---
@@ -412,6 +423,7 @@ export async function getDashboardData(propertyId?: string): Promise<DashboardDa
       propertiesCount: propertyRows.length,
       lateRentCount,
       loansEndingSoonCount,
+      leasesEndingSoonCount,
     }),
   };
 }

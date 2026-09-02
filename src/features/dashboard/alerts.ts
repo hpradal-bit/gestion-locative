@@ -4,6 +4,7 @@ export type DeriveAlertsInput = {
   propertiesCount: number;
   lateRentCount: number;
   loansEndingSoonCount: number;
+  leasesEndingSoonCount: number;
 };
 
 /**
@@ -14,6 +15,7 @@ export function deriveAlerts({
   propertiesCount,
   lateRentCount,
   loansEndingSoonCount,
+  leasesEndingSoonCount,
 }: DeriveAlertsInput): DashboardAlert[] {
   const alerts: DashboardAlert[] = [];
 
@@ -45,6 +47,17 @@ export function deriveAlerts({
         loansEndingSoonCount === 1
           ? "1 crédit se termine bientôt"
           : `${loansEndingSoonCount} crédits se terminent bientôt`,
+    });
+  }
+
+  if (leasesEndingSoonCount > 0) {
+    alerts.push({
+      id: "lease-ending-soon",
+      level: "info",
+      message:
+        leasesEndingSoonCount === 1
+          ? "1 bail arrive à échéance"
+          : `${leasesEndingSoonCount} baux arrivent à échéance`,
     });
   }
 

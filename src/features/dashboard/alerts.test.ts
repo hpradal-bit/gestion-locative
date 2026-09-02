@@ -8,6 +8,7 @@ describe("deriveAlerts", () => {
       propertiesCount: 0,
       lateRentCount: 0,
       loansEndingSoonCount: 0,
+      leasesEndingSoonCount: 0,
     });
     expect(alerts).toEqual([
       {
@@ -24,6 +25,7 @@ describe("deriveAlerts", () => {
       propertiesCount: 2,
       lateRentCount: 2,
       loansEndingSoonCount: 0,
+      leasesEndingSoonCount: 0,
     });
     expect(alerts).toContainEqual({
       id: "late-rent",
@@ -32,11 +34,26 @@ describe("deriveAlerts", () => {
     });
   });
 
+  it("signale les baux qui arrivent à échéance", () => {
+    const alerts = deriveAlerts({
+      propertiesCount: 2,
+      lateRentCount: 0,
+      loansEndingSoonCount: 0,
+      leasesEndingSoonCount: 1,
+    });
+    expect(alerts).toContainEqual({
+      id: "lease-ending-soon",
+      level: "info",
+      message: "1 bail arrive à échéance",
+    });
+  });
+
   it("affiche un message positif quand tout est à jour", () => {
     const alerts = deriveAlerts({
       propertiesCount: 2,
       lateRentCount: 0,
       loansEndingSoonCount: 0,
+      leasesEndingSoonCount: 0,
     });
     expect(alerts).toContainEqual({
       id: "all-good",
