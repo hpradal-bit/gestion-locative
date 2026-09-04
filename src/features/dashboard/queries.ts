@@ -284,14 +284,17 @@ export async function getDashboardData(propertyId?: string): Promise<DashboardDa
   }
 
   // --- Cash-flow & rentabilité ---
+  // Volontairement sans les charges (dépenses) : uniquement loyers moins
+  // remboursement de crédit. Les dépenses restent visibles séparément
+  // (KPIs et graphique) mais n'entrent plus dans ce calcul pour l'instant.
   const cashFlowMonthly = calculateCashFlow({
     rentCollected: monthlyRentTotal,
-    expenses: monthlyExpenses,
+    expenses: 0,
     loanPayment: monthlyLoanPayments,
   });
   const cashFlowAnnual = calculateCashFlow({
     rentCollected: annualRentTotal,
-    expenses: annualExpenses,
+    expenses: 0,
     loanPayment: monthlyLoanPayments * 12,
   });
 
@@ -457,7 +460,7 @@ export async function getDashboardData(propertyId?: string): Promise<DashboardDa
         revenue,
         expenses: monthExpenses,
         loan: monthlyLoanPayments,
-        cashFlow: revenue - monthExpenses - monthlyLoanPayments,
+        cashFlow: revenue - monthlyLoanPayments,
       };
     }),
     expenseBreakdown: Array.from(expenseByCategory.entries()).map(

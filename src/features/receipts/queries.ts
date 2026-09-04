@@ -7,7 +7,7 @@ export async function getReceiptData(scheduleId: string): Promise<ReceiptData | 
 
   const { data: schedule } = await supabase
     .from("rent_schedules")
-    .select("*, leases(id, properties(name, address, city), tenants(first_name, last_name))")
+    .select("*, leases(id, properties(name, address, city), tenants(first_name, last_name, email))")
     .eq("id", scheduleId)
     .maybeSingle();
 
@@ -47,6 +47,7 @@ export async function getReceiptData(scheduleId: string): Promise<ReceiptData | 
     },
     tenant: {
       fullName: tenant ? `${tenant.first_name} ${tenant.last_name}` : "Locataire",
+      email: tenant?.email ?? null,
     },
     property: {
       name: property?.name ?? "Bien",

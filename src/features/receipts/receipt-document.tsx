@@ -47,7 +47,7 @@ function formatDateFR(value: string) {
 
 export type ReceiptData = {
   owner: { fullName: string; address: string | null };
-  tenant: { fullName: string };
+  tenant: { fullName: string; email: string | null };
   property: { name: string; address: string | null; city: string | null };
   period: { dueDate: string };
   rentAmount: number;

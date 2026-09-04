@@ -29,6 +29,7 @@ import { SelectAllCheckbox } from "@/features/rent-schedules/select-all-checkbox
 import { EditScheduleDialog } from "@/features/rent-schedules/edit-schedule-dialog";
 import { deleteRentSchedule } from "@/features/rent-schedules/actions";
 import { updatePaymentDate } from "@/features/payments/actions";
+import { SendReceiptButton } from "@/features/receipts/send-receipt-button";
 import { InlineDateField } from "@/components/shared/inline-date-field";
 import { listRentSchedules } from "@/features/rent-schedules/queries";
 import type { RentScheduleWithDetails } from "@/features/rent-schedules/types";
@@ -179,12 +180,15 @@ export default async function LoyersPage({
         <div className="flex flex-col items-end gap-1">
           <div className="flex justify-end gap-1">
             {row.status === "paid" ? (
-              <Button size="sm" variant="ghost" asChild>
-                <a href={`/api/quittances/${row.id}`} target="_blank" rel="noreferrer">
-                  <FileText />
-                  Quittance
-                </a>
-              </Button>
+              <>
+                <Button size="sm" variant="ghost" asChild>
+                  <a href={`/api/quittances/${row.id}`} target="_blank" rel="noreferrer">
+                    <FileText />
+                    Quittance
+                  </a>
+                </Button>
+                <SendReceiptButton scheduleId={row.id} />
+              </>
             ) : (
               <>
                 <ReminderDialog

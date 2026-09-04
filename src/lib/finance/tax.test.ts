@@ -106,6 +106,38 @@ describe("calculateLmnpRealTax", () => {
   });
 });
 
+describe("steps (détail étape par étape)", () => {
+  it("chaque fonction renvoie au moins une étape non vide", () => {
+    const regimes = [
+      calculateMicroFoncierTax({ grossAnnualRent: 10_000, tmiRate: 0.3 }),
+      calculateRealFoncierTax({ grossAnnualRent: 10_000, deductibleExpenses: 4_000, tmiRate: 0.3 }),
+      calculateRealFoncierTax({ grossAnnualRent: 5_000, deductibleExpenses: 20_000, tmiRate: 0.3 }),
+      calculateLmnpMicroBicTax({ grossAnnualRent: 10_000, tmiRate: 0.3 }),
+      calculateLmnpRealTax({
+        grossAnnualRent: 10_000,
+        deductibleExpenses: 3_000,
+        amortization: 20_000,
+        tmiRate: 0.3,
+      }),
+    ];
+    for (const result of regimes) {
+      expect(result.steps.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("la première étape du réel foncier est toujours le loyer brut", () => {
+    const result = calculateRealFoncierTax({
+      grossAnnualRent: 10_000,
+      deductibleExpenses: 4_000,
+      tmiRate: 0.3,
+    });
+    expect(result.steps[0]).toEqual({
+      label: "Revenus locatifs bruts encaissés",
+      amount: 10_000,
+    });
+  });
+});
+
 describe("estimateTax", () => {
   it("distribue vers la bonne fonction selon le régime", () => {
     const micro = estimateTax({

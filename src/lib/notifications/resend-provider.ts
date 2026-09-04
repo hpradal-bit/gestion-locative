@@ -8,7 +8,7 @@ const GENERIC_ERROR = "Impossible d'envoyer l'email. Réessayez.";
  * EmailProvider — pour pouvoir changer de fournisseur sans tout réécrire.
  */
 export class ResendEmailProvider implements EmailProvider {
-  async sendEmail({ to, subject, html }: SendEmailInput): Promise<SendEmailResult> {
+  async sendEmail({ to, subject, html, attachments }: SendEmailInput): Promise<SendEmailResult> {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
       return {
@@ -29,6 +29,7 @@ export class ResendEmailProvider implements EmailProvider {
           to,
           subject,
           html,
+          attachments,
         }),
       });
 
