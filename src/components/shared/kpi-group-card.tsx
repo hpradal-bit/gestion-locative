@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import type { LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,7 +21,13 @@ export type KpiGroupItem = {
 type KpiGroupCardProps = {
   label: string;
   value: string;
-  icon: LucideIcon;
+  /**
+   * Élément déjà instancié (ex : <Building2 className="..." />), jamais le
+   * composant lui-même : cette carte est un composant client, et React
+   * interdit de passer une référence de fonction (un composant) depuis un
+   * composant serveur — seul un élément JSX déjà rendu traverse la limite.
+   */
+  icon: React.ReactNode;
   hint?: string;
   tone?: "default" | "positive" | "negative";
   dialogTitle: string;
@@ -44,7 +49,7 @@ const TONE_CLASS: Record<NonNullable<KpiGroupItem["tone"]>, string> = {
 export function KpiGroupCard({
   label,
   value,
-  icon: Icon,
+  icon,
   hint,
   tone = "default",
   dialogTitle,
@@ -75,8 +80,8 @@ export function KpiGroupCard({
             </p>
             {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
           </div>
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-            <Icon className="size-4 text-muted-foreground" />
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted [&_svg]:size-4 [&_svg]:text-muted-foreground">
+            {icon}
           </div>
         </CardContent>
       </Card>

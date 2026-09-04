@@ -88,7 +88,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/">) {
         <KpiGroupCard
           label="Patrimoine"
           value={formatCurrency(data.totalCurrentValue)}
-          icon={Building2}
+          icon={<Building2 />}
           hint={`${data.propertiesCount} bien${data.propertiesCount > 1 ? "s" : ""}`}
           dialogTitle="Patrimoine"
           items={[
@@ -117,7 +117,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/">) {
         <KpiGroupCard
           label="Loyers mensuels"
           value={formatCurrency(data.monthlyRentTotal)}
-          icon={Wallet}
+          icon={<Wallet />}
           hint={
             data.monthlyRentTotal > 0
               ? `${formatPercent((data.rentCollectedThisMonth / data.monthlyRentTotal) * 100, 0)} collecté ce mois-ci`
@@ -143,7 +143,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/">) {
         <KpiGroupCard
           label="Cash-flow (avant impôt)"
           value={formatCurrency(data.cashFlowMonthly)}
-          icon={Wallet}
+          icon={<Wallet />}
           tone={data.cashFlowMonthly >= 0 ? "positive" : "negative"}
           hint="par mois"
           dialogTitle="Cash-flow (avant impôt)"
@@ -196,7 +196,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/">) {
         <KpiGroupCard
           label="Dépenses"
           value={formatCurrency(data.annualExpenses)}
-          icon={Receipt}
+          icon={<Receipt />}
           hint="sur 12 mois"
           dialogTitle="Dépenses"
           items={[
