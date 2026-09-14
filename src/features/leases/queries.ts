@@ -25,3 +25,14 @@ export async function getLease(leaseId: string) {
   const { data } = await supabase.from("leases").select("*").eq("id", leaseId).maybeSingle();
   return data;
 }
+
+/** Baux actifs, tous locataires confondus — pour choisir un bail lors de la génération d'un document. */
+export async function getActiveLeasesForDocuments() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("leases")
+    .select("id, tenants(first_name, last_name), properties(name)")
+    .eq("status", "active")
+    .order("start_date", { ascending: false });
+  return data ?? [];
+}

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { FileStack, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/page-header";
@@ -44,15 +45,32 @@ export default async function ModelesPage() {
           <CardContent className="flex flex-col divide-y p-0">
             {templates.map((template) => (
               <div key={template.id} className="flex items-center justify-between gap-2 p-4">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate font-medium">{template.name}</p>
-                    <Badge variant="secondary">
-                      {TEMPLATE_CATEGORY_LABELS[template.category as TemplateCategory] ??
-                        template.category}
-                    </Badge>
+                {template.category === "bail" ? (
+                  <Link
+                    href={`/baux?templateId=${template.id}`}
+                    className="min-w-0 flex-1 rounded-md outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <div className="flex items-center gap-2">
+                      <p className="truncate font-medium underline-offset-4 hover:underline">
+                        {template.name}
+                      </p>
+                      <Badge variant="secondary">
+                        {TEMPLATE_CATEGORY_LABELS[template.category as TemplateCategory] ??
+                          template.category}
+                      </Badge>
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate font-medium">{template.name}</p>
+                      <Badge variant="secondary">
+                        {TEMPLATE_CATEGORY_LABELS[template.category as TemplateCategory] ??
+                          template.category}
+                      </Badge>
+                    </div>
                   </div>
-                </div>
+                )}
                 <div className="flex shrink-0 gap-1">
                   <TemplateDialog
                     template={template}
