@@ -2,12 +2,14 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 import { AppHeader } from "@/components/layout/app-header";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { ensureUpcomingRentSchedules } from "@/features/rent-schedules/ensure-schedules";
+import { ensureDefaultTemplates } from "@/features/templates/ensure-default-templates";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   // Pas de tâche planifiée dans cette app : on comble ici les échéances de
   // loyer manquantes à chaque visite (voir ensure-schedules.ts).
   await ensureUpcomingRentSchedules();
+  await ensureDefaultTemplates();
 
   const supabase = await createClient();
   const {
