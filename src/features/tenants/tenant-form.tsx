@@ -59,15 +59,6 @@ export function TenantForm({ tenant, action, submitLabel }: TenantFormProps) {
               defaultValue={tenant?.birth_date ?? ""}
             />
           </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="birth_place">Lieu de naissance</Label>
-            <Input
-              id="birth_place"
-              name="birth_place"
-              placeholder="ex : Lyon (69)"
-              defaultValue={tenant?.birth_place ?? ""}
-            />
-          </div>
         </CardContent>
       </Card>
 
