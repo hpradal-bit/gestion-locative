@@ -9,7 +9,7 @@ export async function buildLeaseTemplateVariables(
   const { data: lease } = await supabase
     .from("leases")
     .select(
-      "*, properties(name, address, city, postal_code, lot_number), tenants(first_name, last_name, email, phone, address, birth_date)"
+      "*, properties(name, address, city, postal_code, lot_number, building_level, surface_m2, equipment, special_rule), tenants(first_name, last_name, email, phone, address, birth_date, birth_place)"
     )
     .eq("id", leaseId)
     .maybeSingle();
@@ -43,6 +43,7 @@ export async function buildLeaseTemplateVariables(
     date_naissance_locataire: lease.tenants.birth_date
       ? new Date(lease.tenants.birth_date).toLocaleDateString("fr-FR")
       : "",
+    lieu_naissance_locataire: lease.tenants.birth_place ?? "",
     nom_proprietaire: ownerProfile?.full_name ?? "",
     email_proprietaire: ownerProfile?.email ?? "",
     telephone_proprietaire: ownerProfile?.phone ?? "",
@@ -52,6 +53,10 @@ export async function buildLeaseTemplateVariables(
     ville_bien: lease.properties.city ?? "",
     code_postal_bien: lease.properties.postal_code ?? "",
     numero_lot: lease.properties.lot_number ?? "",
+    batiment_niveau: lease.properties.building_level ?? "",
+    surface_bien: lease.properties.surface_m2 !== null ? String(lease.properties.surface_m2) : "",
+    equipements_bien: lease.properties.equipment ?? "",
+    regle_particuliere: lease.properties.special_rule ?? "",
     type_bail: leaseType ? LEASE_TYPE_LABELS[leaseType] : "",
     nombre_cles: lease.keys_count !== null ? String(lease.keys_count) : "",
     nombre_badges: lease.badges_count !== null ? String(lease.badges_count) : "",
@@ -66,6 +71,12 @@ export async function buildLeaseTemplateVariables(
       : "",
     date_debut_bail: new Date(lease.start_date).toLocaleDateString("fr-FR"),
     date_fin_bail: lease.end_date ? new Date(lease.end_date).toLocaleDateString("fr-FR") : "",
+    etat_bien_remise: lease.condition_at_handover ?? "",
+    usage_autorise: lease.authorized_use ?? "",
+    mode_paiement_loyer: lease.payment_method ?? "",
+    detail_charges: lease.charges_detail ?? "",
+    mode_versement_depot: lease.deposit_payment_method ?? "",
+    reserve_vente: lease.sale_clause_reserve ?? "",
     date_du_jour: new Date().toLocaleDateString("fr-FR"),
   };
 }

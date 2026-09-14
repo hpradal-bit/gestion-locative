@@ -20,6 +20,7 @@ export const tenantSchema = z.object({
   phone: optionalText,
   address: optionalText,
   birth_date: optionalDate,
+  birth_place: optionalText,
 });
 
 export type TenantInput = z.infer<typeof tenantSchema>;

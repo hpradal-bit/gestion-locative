@@ -51,6 +51,12 @@ export const leaseSchema = z.object({
     z.coerce.number().int().min(0).optional()
   ),
   signature_city: optionalText,
+  condition_at_handover: optionalText,
+  authorized_use: optionalText,
+  payment_method: optionalText,
+  charges_detail: optionalText,
+  deposit_payment_method: optionalText,
+  sale_clause_reserve: optionalText,
 });
 
 export type LeaseInput = z.infer<typeof leaseSchema>;

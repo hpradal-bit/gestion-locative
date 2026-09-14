@@ -166,9 +166,13 @@ export type Database = {
       }
       leases: {
         Row: {
+          authorized_use: string | null
           badges_count: number | null
           charges: number
+          charges_detail: string | null
+          condition_at_handover: string | null
           created_at: string
+          deposit_payment_method: string | null
           end_date: string | null
           id: string
           initial_rent: number
@@ -177,7 +181,9 @@ export type Database = {
           lease_type: string | null
           next_revision_date: string | null
           payment_due_day: number
+          payment_method: string | null
           property_id: string
+          sale_clause_reserve: string | null
           security_deposit: number
           signature_city: string | null
           start_date: string
@@ -187,9 +193,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          authorized_use?: string | null
           badges_count?: number | null
           charges?: number
+          charges_detail?: string | null
+          condition_at_handover?: string | null
           created_at?: string
+          deposit_payment_method?: string | null
           end_date?: string | null
           id?: string
           initial_rent: number
@@ -198,7 +208,9 @@ export type Database = {
           lease_type?: string | null
           next_revision_date?: string | null
           payment_due_day?: number
+          payment_method?: string | null
           property_id: string
+          sale_clause_reserve?: string | null
           security_deposit?: number
           signature_city?: string | null
           start_date: string
@@ -208,9 +220,13 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          authorized_use?: string | null
           badges_count?: number | null
           charges?: number
+          charges_detail?: string | null
+          condition_at_handover?: string | null
           created_at?: string
+          deposit_payment_method?: string | null
           end_date?: string | null
           id?: string
           initial_rent?: number
@@ -219,7 +235,9 @@ export type Database = {
           lease_type?: string | null
           next_revision_date?: string | null
           payment_due_day?: number
+          payment_method?: string | null
           property_id?: string
+          sale_clause_reserve?: string | null
           security_deposit?: number
           signature_city?: string | null
           start_date?: string
@@ -383,11 +401,13 @@ export type Database = {
           address: string | null
           agency_fees: number
           annual_amortization: number | null
+          building_level: string | null
           city: string | null
           condo_fees_annual: number
           created_at: string
           current_value: number | null
           current_value_updated_at: string | null
+          equipment: string | null
           floor: number | null
           furniture_budget: number
           has_balcony: boolean
@@ -413,6 +433,7 @@ export type Database = {
           purchase_price: number | null
           rental_start_date: string | null
           rooms: number | null
+          special_rule: string | null
           surface_m2: number | null
           tax_regime: string | null
           updated_at: string
@@ -423,11 +444,13 @@ export type Database = {
           address?: string | null
           agency_fees?: number
           annual_amortization?: number | null
+          building_level?: string | null
           city?: string | null
           condo_fees_annual?: number
           created_at?: string
           current_value?: number | null
           current_value_updated_at?: string | null
+          equipment?: string | null
           floor?: number | null
           furniture_budget?: number
           has_balcony?: boolean
@@ -453,6 +476,7 @@ export type Database = {
           purchase_price?: number | null
           rental_start_date?: string | null
           rooms?: number | null
+          special_rule?: string | null
           surface_m2?: number | null
           tax_regime?: string | null
           updated_at?: string
@@ -463,11 +487,13 @@ export type Database = {
           address?: string | null
           agency_fees?: number
           annual_amortization?: number | null
+          building_level?: string | null
           city?: string | null
           condo_fees_annual?: number
           created_at?: string
           current_value?: number | null
           current_value_updated_at?: string | null
+          equipment?: string | null
           floor?: number | null
           furniture_budget?: number
           has_balcony?: boolean
@@ -493,6 +519,7 @@ export type Database = {
           purchase_price?: number | null
           rental_start_date?: string | null
           rooms?: number | null
+          special_rule?: string | null
           surface_m2?: number | null
           tax_regime?: string | null
           updated_at?: string
@@ -617,6 +644,7 @@ export type Database = {
         Row: {
           address: string | null
           birth_date: string | null
+          birth_place: string | null
           created_at: string
           email: string | null
           first_name: string
@@ -629,6 +657,7 @@ export type Database = {
         Insert: {
           address?: string | null
           birth_date?: string | null
+          birth_place?: string | null
           created_at?: string
           email?: string | null
           first_name: string
@@ -641,6 +670,7 @@ export type Database = {
         Update: {
           address?: string | null
           birth_date?: string | null
+          birth_place?: string | null
           created_at?: string
           email?: string | null
           first_name?: string

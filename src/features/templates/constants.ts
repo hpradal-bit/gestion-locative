@@ -46,6 +46,11 @@ export const LEASE_TEMPLATE_VARIABLES: {
     description: "Date de naissance du locataire (si connue)",
     location: "tenant",
   },
+  {
+    key: "lieu_naissance_locataire",
+    description: "Lieu de naissance du locataire (si connu)",
+    location: "tenant",
+  },
   { key: "nom_proprietaire", description: "Nom du propriétaire", location: "owner" },
   { key: "email_proprietaire", description: "Email du propriétaire", location: "owner" },
   { key: "telephone_proprietaire", description: "Téléphone du propriétaire", location: "owner" },
@@ -57,6 +62,26 @@ export const LEASE_TEMPLATE_VARIABLES: {
   {
     key: "numero_lot",
     description: "Numéro de lot / box (si renseigné sur le bien)",
+    location: "property",
+  },
+  {
+    key: "batiment_niveau",
+    description: "Bâtiment / niveau (si renseigné sur le bien)",
+    location: "property",
+  },
+  {
+    key: "surface_bien",
+    description: "Surface approximative du bien (si renseignée)",
+    location: "property",
+  },
+  {
+    key: "equipements_bien",
+    description: "Équipements du bien (si renseignés)",
+    location: "property",
+  },
+  {
+    key: "regle_particuliere",
+    description: "Règle particulière de copropriété (si renseignée)",
     location: "property",
   },
   { key: "type_bail", description: "Type de bail", location: "lease" },
@@ -91,5 +116,35 @@ export const LEASE_TEMPLATE_VARIABLES: {
   },
   { key: "date_debut_bail", description: "Date de début du bail", location: "lease" },
   { key: "date_fin_bail", description: "Date de fin du bail (si connue)", location: "lease" },
+  {
+    key: "etat_bien_remise",
+    description: "État du bien à la remise (si renseigné sur le bail)",
+    location: "lease",
+  },
+  {
+    key: "usage_autorise",
+    description: "Usage autorisé (si renseigné sur le bail)",
+    location: "lease",
+  },
+  {
+    key: "mode_paiement_loyer",
+    description: "Mode de paiement du loyer (si renseigné sur le bail)",
+    location: "lease",
+  },
+  {
+    key: "detail_charges",
+    description: "Détail des charges (si renseigné sur le bail)",
+    location: "lease",
+  },
+  {
+    key: "mode_versement_depot",
+    description: "Mode de versement du dépôt de garantie (si renseigné sur le bail)",
+    location: "lease",
+  },
+  {
+    key: "reserve_vente",
+    description: "Réserve du bailleur en cas de vente (facultatif)",
+    location: "lease",
+  },
   { key: "date_du_jour", description: "Date du jour de génération", location: "computed" },
 ];

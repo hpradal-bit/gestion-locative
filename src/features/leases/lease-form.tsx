@@ -6,6 +6,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { MoneyInput } from "@/components/shared/money-input";
 import { PropertySelector } from "@/components/shared/property-selector";
 import {
@@ -175,7 +176,7 @@ export function LeaseForm({ tenantId, properties, action, lease, submitLabel }: 
 
       <Card>
         <CardHeader>
-          <CardTitle>Remise des clés (box, garage, parking)</CardTitle>
+          <CardTitle>Détails complémentaires (box, garage, parking)</CardTitle>
           <CardDescription>
             Utile pour un bail de box/garage — repris automatiquement dans les modèles de
             document. Laissez vide si non applicable.
@@ -209,6 +210,60 @@ export function LeaseForm({ tenantId, properties, action, lease, submitLabel }: 
               name="signature_city"
               placeholder="ex : Paris"
               defaultValue={lease?.signature_city ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="authorized_use">Usage autorisé</Label>
+            <Input
+              id="authorized_use"
+              name="authorized_use"
+              placeholder="ex : le stationnement d'un véhicule"
+              defaultValue={lease?.authorized_use ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="payment_method">Mode de paiement du loyer</Label>
+            <Input
+              id="payment_method"
+              name="payment_method"
+              placeholder="ex : virement bancaire"
+              defaultValue={lease?.payment_method ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="deposit_payment_method">Mode de versement du dépôt de garantie</Label>
+            <Input
+              id="deposit_payment_method"
+              name="deposit_payment_method"
+              placeholder="ex : virement bancaire"
+              defaultValue={lease?.deposit_payment_method ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2 sm:col-span-3">
+            <Label htmlFor="condition_at_handover">État du bien à la remise</Label>
+            <Textarea
+              id="condition_at_handover"
+              name="condition_at_handover"
+              placeholder="ex : bon état général, sol et murs en bon état, porte fonctionnelle"
+              defaultValue={lease?.condition_at_handover ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2 sm:col-span-3">
+            <Label htmlFor="charges_detail">Détail des charges</Label>
+            <Textarea
+              id="charges_detail"
+              name="charges_detail"
+              placeholder="ex : entretien du portail et de l'éclairage commun du parking"
+              defaultValue={lease?.charges_detail ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2 sm:col-span-3">
+            <Label htmlFor="sale_clause_reserve">Réserve du bailleur en cas de vente (optionnel)</Label>
+            <Textarea
+              id="sale_clause_reserve"
+              name="sale_clause_reserve"
+              placeholder="ex : le Bailleur ne se réserve aucun droit de résiliation anticipée en cas de vente"
+              defaultValue={lease?.sale_clause_reserve ?? ""}
             />
           </div>
         </CardContent>

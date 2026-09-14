@@ -42,6 +42,10 @@ export const propertySchema = z.object({
   // Numéro de lot/box — utile pour un box, garage ou emplacement de
   // stationnement en copropriété (repris automatiquement dans les baux).
   lot_number: optionalText,
+  // Champs complémentaires pour un box/garage — repris dans les modèles de bail.
+  building_level: optionalText,
+  equipment: optionalText,
+  special_rule: optionalText,
   property_type: z.preprocess(
     (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
     z.enum(propertyTypes, { message: "Type de bien invalide." }).optional()

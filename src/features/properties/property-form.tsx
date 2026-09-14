@@ -114,6 +114,33 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
             />
           </div>
           <div className="flex flex-col gap-2">
+            <Label htmlFor="building_level">Bâtiment / niveau</Label>
+            <Input
+              id="building_level"
+              name="building_level"
+              placeholder="ex : Bâtiment B, niveau -1"
+              defaultValue={property?.building_level ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2 sm:col-span-2">
+            <Label htmlFor="equipment">Équipements</Label>
+            <Input
+              id="equipment"
+              name="equipment"
+              placeholder="ex : accès sécurisé, porte automatique"
+              defaultValue={property?.equipment ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2 sm:col-span-2">
+            <Label htmlFor="special_rule">Règle particulière de copropriété</Label>
+            <Input
+              id="special_rule"
+              name="special_rule"
+              placeholder="ex : accès au parking interdit entre 23h et 6h sauf urgence"
+              defaultValue={property?.special_rule ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
             <Label htmlFor="property_type">Type</Label>
             <Select name="property_type" defaultValue={property?.property_type ?? undefined}>
               <SelectTrigger id="property_type" className="w-full">
