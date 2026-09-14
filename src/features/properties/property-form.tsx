@@ -105,6 +105,15 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
             />
           </div>
           <div className="flex flex-col gap-2">
+            <Label htmlFor="lot_number">Numéro de lot / box</Label>
+            <Input
+              id="lot_number"
+              name="lot_number"
+              placeholder="ex : Box 14"
+              defaultValue={property?.lot_number ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
             <Label htmlFor="property_type">Type</Label>
             <Select name="property_type" defaultValue={property?.property_type ?? undefined}>
               <SelectTrigger id="property_type" className="w-full">

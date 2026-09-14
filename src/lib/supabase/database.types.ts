@@ -166,17 +166,20 @@ export type Database = {
       }
       leases: {
         Row: {
+          badges_count: number | null
           charges: number
           created_at: string
           end_date: string | null
           id: string
           initial_rent: number
           irl_index: string | null
+          keys_count: number | null
           lease_type: string | null
           next_revision_date: string | null
           payment_due_day: number
           property_id: string
           security_deposit: number
+          signature_city: string | null
           start_date: string
           status: string
           tenant_id: string
@@ -184,17 +187,20 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          badges_count?: number | null
           charges?: number
           created_at?: string
           end_date?: string | null
           id?: string
           initial_rent: number
           irl_index?: string | null
+          keys_count?: number | null
           lease_type?: string | null
           next_revision_date?: string | null
           payment_due_day?: number
           property_id: string
           security_deposit?: number
+          signature_city?: string | null
           start_date: string
           status?: string
           tenant_id: string
@@ -202,17 +208,20 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          badges_count?: number | null
           charges?: number
           created_at?: string
           end_date?: string | null
           id?: string
           initial_rent?: number
           irl_index?: string | null
+          keys_count?: number | null
           lease_type?: string | null
           next_revision_date?: string | null
           payment_due_day?: number
           property_id?: string
           security_deposit?: number
+          signature_city?: string | null
           start_date?: string
           status?: string
           tenant_id?: string
@@ -388,6 +397,7 @@ export type Database = {
           id: string
           insurance_annual: number
           is_furnished: boolean
+          lot_number: string | null
           maintenance_annual: number
           management_fees_annual: number
           monthly_charges: number
@@ -427,6 +437,7 @@ export type Database = {
           id?: string
           insurance_annual?: number
           is_furnished?: boolean
+          lot_number?: string | null
           maintenance_annual?: number
           management_fees_annual?: number
           monthly_charges?: number
@@ -466,6 +477,7 @@ export type Database = {
           id?: string
           insurance_annual?: number
           is_furnished?: boolean
+          lot_number?: string | null
           maintenance_annual?: number
           management_fees_annual?: number
           monthly_charges?: number

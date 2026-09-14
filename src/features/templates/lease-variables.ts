@@ -9,7 +9,7 @@ export async function buildLeaseTemplateVariables(
   const { data: lease } = await supabase
     .from("leases")
     .select(
-      "*, properties(name, address, city, postal_code), tenants(first_name, last_name, email, phone, address, birth_date)"
+      "*, properties(name, address, city, postal_code, lot_number), tenants(first_name, last_name, email, phone, address, birth_date)"
     )
     .eq("id", leaseId)
     .maybeSingle();
@@ -51,7 +51,11 @@ export async function buildLeaseTemplateVariables(
     adresse_bien: lease.properties.address ?? "",
     ville_bien: lease.properties.city ?? "",
     code_postal_bien: lease.properties.postal_code ?? "",
+    numero_lot: lease.properties.lot_number ?? "",
     type_bail: leaseType ? LEASE_TYPE_LABELS[leaseType] : "",
+    nombre_cles: lease.keys_count !== null ? String(lease.keys_count) : "",
+    nombre_badges: lease.badges_count !== null ? String(lease.badges_count) : "",
+    ville_signature: lease.signature_city ?? "",
     loyer: formatCurrency(lease.initial_rent),
     charges: formatCurrency(lease.charges),
     depot_garantie: formatCurrency(lease.security_deposit),

@@ -173,6 +173,47 @@ export function LeaseForm({ tenantId, properties, action, lease, submitLabel }: 
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Remise des clés (box, garage, parking)</CardTitle>
+          <CardDescription>
+            Utile pour un bail de box/garage — repris automatiquement dans les modèles de
+            document. Laissez vide si non applicable.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="keys_count">Nombre de clés</Label>
+            <Input
+              id="keys_count"
+              name="keys_count"
+              type="number"
+              min={0}
+              defaultValue={lease?.keys_count ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="badges_count">Nombre de badges</Label>
+            <Input
+              id="badges_count"
+              name="badges_count"
+              type="number"
+              min={0}
+              defaultValue={lease?.badges_count ?? ""}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="signature_city">Ville de signature</Label>
+            <Input
+              id="signature_city"
+              name="signature_city"
+              placeholder="ex : Paris"
+              defaultValue={lease?.signature_city ?? ""}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       {state.error && (
         <p className="text-sm text-destructive" role="alert">
           {state.error}

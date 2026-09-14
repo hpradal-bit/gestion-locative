@@ -22,7 +22,7 @@ Le Bailleur et le Locataire sont identifiés ci-dessus en en-tête du présent c
 
 ARTICLE 2 — DÉSIGNATION DU BIEN
 
-Le Bailleur donne à bail au Locataire, qui accepte, le bien désigné ci-après : {{nom_bien}}, sis {{adresse_bien}}, {{ville_bien}}, [BÂTIMENT / NIVEAU], portant le numéro [NUMÉRO DE BOX / LOT] (lot de copropriété n° [NUMÉRO DE LOT DE COPROPRIÉTÉ]). Surface approximative : [SURFACE EN M²] m². Le bien est équipé de [ÉQUIPEMENTS : accès sécurisé, porte automatique, etc.]. Il est remis au Locataire avec [NOMBRE DE CLÉS] clé(s) et [NOMBRE DE BADGES] badge(s) d'accès. État du bien à la remise : [ÉTAT DU BIEN À LA REMISE].
+Le Bailleur donne à bail au Locataire, qui accepte, le bien désigné ci-après : {{nom_bien}}, sis {{adresse_bien}}, {{ville_bien}}, [BÂTIMENT / NIVEAU], portant le numéro {{numero_lot}}. Surface approximative : [SURFACE EN M²] m². Le bien est équipé de [ÉQUIPEMENTS : accès sécurisé, porte automatique, etc.]. Il est remis au Locataire avec {{nombre_cles}} clé(s) et {{nombre_badges}} badge(s) d'accès. État du bien à la remise : [ÉTAT DU BIEN À LA REMISE].
 
 ARTICLE 3 — DESTINATION ET USAGE
 
@@ -42,7 +42,7 @@ Les charges comprennent [DÉTAIL DES CHARGES : entretien du portail, éclairage 
 
 ARTICLE 7 — RÉVISION DU LOYER
 
-Le loyer sera révisé chaque année, à la date anniversaire du contrat, en fonction de la variation de l'Indice national du coût de la construction (ICC) publié par l'INSEE, selon la formule suivante : Loyer révisé = Loyer initial × (ICC du trimestre de référence en vigueur à la date de révision / ICC du trimestre de référence en vigueur à la date de signature du contrat). Indice de référence à la signature : [VALEUR DE L'INDICE ICC] ([TRIMESTRE DE RÉFÉRENCE]). À défaut de publication de l'indice à la date de révision, la révision sera effectuée sur la base du dernier indice publié.
+Le loyer sera révisé chaque année, à la date anniversaire du contrat, en fonction de la variation de l'Indice national du coût de la construction (ICC) publié par l'INSEE, selon la formule suivante : Loyer révisé = Loyer initial × (ICC du trimestre de référence en vigueur à la date de révision / ICC du trimestre de référence en vigueur à la date de signature du contrat). Indice de référence à la signature : {{indice_irl}}. À défaut de publication de l'indice à la date de révision, la révision sera effectuée sur la base du dernier indice publié.
 
 ARTICLE 8 — DÉPÔT DE GARANTIE
 
@@ -50,7 +50,7 @@ Un dépôt de garantie d'un montant de {{depot_garantie}} € est versé par le 
 
 ARTICLE 9 — ÉTAT DES LIEUX ET REMISE DES CLÉS
 
-Un état des lieux d'entrée contradictoire est établi à la remise du bien (voir Annexe 1). Il sera remis au Locataire : [NOMBRE DE CLÉS] clé(s) et [NOMBRE DE BADGES] badge(s). Un état des lieux de sortie sera établi contradictoirement à la restitution du bien, dans les mêmes conditions. À défaut d'état des lieux établi contradictoirement à l'entrée, le Locataire est présumé avoir reçu le bien en bon état de réparations locatives, conformément à l'article 1731 du Code civil, et devra le restituer dans ce même état.
+Un état des lieux d'entrée contradictoire est établi à la remise du bien (voir Annexe 1). Il sera remis au Locataire : {{nombre_cles}} clé(s) et {{nombre_badges}} badge(s). Un état des lieux de sortie sera établi contradictoirement à la restitution du bien, dans les mêmes conditions. À défaut d'état des lieux établi contradictoirement à l'entrée, le Locataire est présumé avoir reçu le bien en bon état de réparations locatives, conformément à l'article 1731 du Code civil, et devra le restituer dans ce même état.
 
 ARTICLE 10 — OBLIGATIONS DU LOCATAIRE
 
@@ -121,7 +121,7 @@ ARTICLE 24 — DISPOSITIONS FINALES
 
 Le présent contrat, ainsi que ses annexes, exprime l'intégralité des engagements des parties. Toute modification devra faire l'objet d'un accord écrit signé des deux parties. Le fait pour l'une des parties de ne pas se prévaloir, à un moment donné, d'un manquement de l'autre partie à l'une des clauses du présent contrat ne saurait être interprété comme une renonciation à s'en prévaloir ultérieurement. Si l'une des clauses du présent contrat était déclarée nulle, non écrite ou inopposable par une juridiction, les autres clauses conserveraient toute leur force obligatoire entre les parties.
 
-Fait à [VILLE DE SIGNATURE], le {{date_du_jour}}
+Fait à {{ville_signature}}, le {{date_du_jour}}
 
 Signature du Bailleur                                    Signature du Locataire
 
