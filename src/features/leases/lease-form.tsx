@@ -23,16 +23,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { Tables } from "@/lib/supabase/database.types";
-import { leaseTypes } from "./schema";
+import { leaseTypes, LEASE_TYPE_LABELS } from "./schema";
 import type { LeaseActionState } from "./actions";
-
-const LEASE_TYPE_LABELS: Record<(typeof leaseTypes)[number], string> = {
-  vide: "Location vide",
-  meuble: "Location meublée",
-  mobilite: "Bail mobilité",
-  commercial: "Bail commercial",
-  autre: "Autre",
-};
 
 type LeaseFormProps = {
   tenantId: string;

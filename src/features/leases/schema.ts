@@ -14,6 +14,14 @@ const money = z.coerce.number().min(0, "Le montant doit être positif ou nul").d
 
 export const leaseTypes = ["vide", "meuble", "mobilite", "commercial", "autre"] as const;
 
+export const LEASE_TYPE_LABELS: Record<(typeof leaseTypes)[number], string> = {
+  vide: "Location vide",
+  meuble: "Location meublée",
+  mobilite: "Bail mobilité",
+  commercial: "Bail commercial",
+  autre: "Autre",
+};
+
 export const leaseSchema = z.object({
   property_id: z.string().uuid("Sélectionnez un bien."),
   tenant_id: z.string().uuid("Locataire invalide."),

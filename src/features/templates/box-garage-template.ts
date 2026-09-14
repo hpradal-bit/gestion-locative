@@ -6,12 +6,12 @@ Le présent contrat porte exclusivement sur la location d'un box, garage ou empl
 
 Entre les soussignés :
 
-{{nom_proprietaire}}, [PRÉNOM DU PROPRIÉTAIRE], né(e) le [DATE DE NAISSANCE] à [LIEU DE NAISSANCE], demeurant [ADRESSE DU PROPRIÉTAIRE], téléphone : [TÉLÉPHONE DU PROPRIÉTAIRE], email : [EMAIL DU PROPRIÉTAIRE],
+{{nom_proprietaire}}, demeurant {{adresse_proprietaire}}, téléphone : {{telephone_proprietaire}}, email : {{email_proprietaire}},
 ci-après dénommé « le Bailleur »,
 
 ET
 
-{{prenom_locataire}} {{nom_locataire}}, né(e) le [DATE DE NAISSANCE DU LOCATAIRE] à [LIEU DE NAISSANCE DU LOCATAIRE], demeurant [ADRESSE DU LOCATAIRE], téléphone : [TÉLÉPHONE DU LOCATAIRE], email : [EMAIL DU LOCATAIRE],
+{{prenom_locataire}} {{nom_locataire}}, né(e) le {{date_naissance_locataire}} à [LIEU DE NAISSANCE DU LOCATAIRE], demeurant {{adresse_locataire}}, téléphone : {{telephone_locataire}}, email : {{email_locataire}},
 ci-après dénommé(e) « le Locataire »,
 
 Il a été convenu ce qui suit :
@@ -34,7 +34,7 @@ Le présent contrat est conclu pour une durée déterminée d'un an, à compter 
 
 ARTICLE 5 — LOYER ET MODALITÉS DE PAIEMENT
 
-Le loyer mensuel hors charges est fixé à {{loyer}} €. Les charges s'élèvent à {{charges}} € par mois. Le loyer est payable à échoir, le [JOUR DU MOIS] de chaque mois, par [MODE DE PAIEMENT : virement bancaire / prélèvement / etc.]. Tout retard de paiement expose le Locataire aux conséquences prévues à l'article 18.
+Le loyer mensuel hors charges est fixé à {{loyer}} €. Les charges s'élèvent à {{charges}} € par mois. Le loyer est payable à échoir, le {{jour_paiement_loyer}} de chaque mois, par [MODE DE PAIEMENT : virement bancaire / prélèvement / etc.]. Tout retard de paiement expose le Locataire aux conséquences prévues à l'article 18.
 
 ARTICLE 6 — CHARGES
 
@@ -109,8 +109,8 @@ En cas de vente du bien par le Bailleur, le présent contrat se poursuivra de pl
 ARTICLE 22 — NOTIFICATIONS
 
 Toute notification relative au présent contrat sera valablement effectuée aux adresses suivantes, sauf modification notifiée par écrit à l'autre partie :
-Bailleur : [ADRESSE DU BAILLEUR].
-Locataire : [ADRESSE DU LOCATAIRE].
+Bailleur : {{adresse_proprietaire}}.
+Locataire : {{adresse_locataire}}.
 Les échanges courants entre les parties (informations, demandes ordinaires) pourront être effectués par email aux adresses indiquées en en-tête du présent contrat. En revanche, toute notification ayant un effet juridique — mise en demeure, congé, notification de résiliation — devra impérativement être effectuée par lettre recommandée avec accusé de réception ou par acte d'huissier, à l'exclusion de tout email ou SMS, afin d'en garantir la preuve et la date certaine.
 
 ARTICLE 23 — LITIGES
