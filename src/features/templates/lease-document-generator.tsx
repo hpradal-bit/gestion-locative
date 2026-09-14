@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { FileOutput, Send } from "lucide-react";
+import Link from "next/link";
+import { FileOutput, Send, TriangleAlert, CircleCheck } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Tables } from "@/lib/supabase/database.types";
 import { sendLeaseDocumentEmail } from "./lease-document-actions";
+import { checkMissingVariables, type MissingVariable } from "./check-missing-variables";
 
 type LeaseOption = {
   id: string;
@@ -38,8 +40,22 @@ export function LeaseDocumentGenerator({
   );
   const [leaseId, setLeaseId] = React.useState<string | undefined>(undefined);
   const [isSending, startTransition] = React.useTransition();
+  const [missing, setMissing] = React.useState<MissingVariable[] | null>(null);
+  const [isChecking, startCheckTransition] = React.useTransition();
 
   const ready = Boolean(templateId && leaseId);
+
+  React.useEffect(() => {
+    if (!templateId || !leaseId) return;
+    let cancelled = false;
+    startCheckTransition(async () => {
+      const result = await checkMissingVariables(templateId, leaseId);
+      if (!cancelled) setMissing(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [templateId, leaseId]);
 
   return (
     <Card>
@@ -83,6 +99,43 @@ export function LeaseDocumentGenerator({
             </Select>
           </div>
         </div>
+
+        {ready && !isChecking && missing !== null && (
+          <div
+            className={
+              missing.length > 0
+                ? "flex flex-col gap-2 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm dark:border-amber-800 dark:bg-amber-950"
+                : "flex items-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+            }
+          >
+            {missing.length > 0 ? (
+              <>
+                <div className="flex items-center gap-2 font-medium text-amber-900 dark:text-amber-300">
+                  <TriangleAlert className="size-4" />
+                  {missing.length} information{missing.length > 1 ? "s" : ""} manquante
+                  {missing.length > 1 ? "s" : ""}
+                </div>
+                <ul className="flex flex-col gap-1">
+                  {missing.map((item) => (
+                    <li key={item.key}>
+                      <Link
+                        href={item.href}
+                        className="text-amber-900 underline underline-offset-2 hover:text-amber-700 dark:text-amber-300 dark:hover:text-amber-200"
+                      >
+                        {item.description} → à compléter dans « {item.locationLabel} »
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <>
+                <CircleCheck className="size-4" />
+                Toutes les informations utilisées par ce modèle sont renseignées.
+              </>
+            )}
+          </div>
+        )}
 
         <div className="flex flex-wrap justify-end gap-2">
           <Button variant="outline" disabled={!ready} asChild={ready}>

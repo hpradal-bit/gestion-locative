@@ -16,34 +16,80 @@ export const TEMPLATE_CATEGORY_LABELS: Record<TemplateCategory, string> = {
   autre: "Autres documents",
 };
 
+/**
+ * Où corriger une variable manquante : quel formulaire de l'application
+ * porte réellement la donnée derrière cette variable.
+ */
+export type VariableLocation = "tenant" | "owner" | "property" | "lease" | "computed";
+
+export const VARIABLE_LOCATION_LABELS: Record<VariableLocation, string> = {
+  tenant: "Fiche du locataire",
+  owner: "Vos coordonnées (Paramètres)",
+  property: "Fiche du bien",
+  lease: "Informations du bail",
+  computed: "Généré automatiquement",
+};
+
 /** Variables disponibles pour un modèle de bail ou d'état des lieux. */
-export const LEASE_TEMPLATE_VARIABLES: { key: string; description: string }[] = [
-  { key: "nom_locataire", description: "Nom de famille du locataire" },
-  { key: "prenom_locataire", description: "Prénom du locataire" },
-  { key: "email_locataire", description: "Email du locataire" },
-  { key: "telephone_locataire", description: "Téléphone du locataire" },
-  { key: "adresse_locataire", description: "Adresse du locataire" },
-  { key: "date_naissance_locataire", description: "Date de naissance du locataire (si connue)" },
-  { key: "nom_proprietaire", description: "Nom du propriétaire" },
-  { key: "email_proprietaire", description: "Email du propriétaire" },
-  { key: "telephone_proprietaire", description: "Téléphone du propriétaire" },
-  { key: "adresse_proprietaire", description: "Adresse du propriétaire" },
-  { key: "nom_bien", description: "Nom du bien" },
-  { key: "adresse_bien", description: "Adresse du bien" },
-  { key: "ville_bien", description: "Ville du bien" },
-  { key: "code_postal_bien", description: "Code postal du bien" },
-  { key: "numero_lot", description: "Numéro de lot / box (si renseigné sur le bien)" },
-  { key: "type_bail", description: "Type de bail" },
-  { key: "nombre_cles", description: "Nombre de clés remises (si renseigné sur le bail)" },
-  { key: "nombre_badges", description: "Nombre de badges remis (si renseigné sur le bail)" },
-  { key: "ville_signature", description: "Ville de signature (si renseignée sur le bail)" },
-  { key: "loyer", description: "Loyer mensuel hors charges" },
-  { key: "charges", description: "Charges mensuelles" },
-  { key: "depot_garantie", description: "Dépôt de garantie" },
-  { key: "jour_paiement_loyer", description: "Jour du mois où le loyer est dû" },
-  { key: "indice_irl", description: "Indice IRL/ICC de référence (si renseigné sur le bail)" },
-  { key: "prochaine_revision_loyer", description: "Date de la prochaine révision du loyer (si connue)" },
-  { key: "date_debut_bail", description: "Date de début du bail" },
-  { key: "date_fin_bail", description: "Date de fin du bail (si connue)" },
-  { key: "date_du_jour", description: "Date du jour de génération" },
+export const LEASE_TEMPLATE_VARIABLES: {
+  key: string;
+  description: string;
+  location: VariableLocation;
+}[] = [
+  { key: "nom_locataire", description: "Nom de famille du locataire", location: "tenant" },
+  { key: "prenom_locataire", description: "Prénom du locataire", location: "tenant" },
+  { key: "email_locataire", description: "Email du locataire", location: "tenant" },
+  { key: "telephone_locataire", description: "Téléphone du locataire", location: "tenant" },
+  { key: "adresse_locataire", description: "Adresse du locataire", location: "tenant" },
+  {
+    key: "date_naissance_locataire",
+    description: "Date de naissance du locataire (si connue)",
+    location: "tenant",
+  },
+  { key: "nom_proprietaire", description: "Nom du propriétaire", location: "owner" },
+  { key: "email_proprietaire", description: "Email du propriétaire", location: "owner" },
+  { key: "telephone_proprietaire", description: "Téléphone du propriétaire", location: "owner" },
+  { key: "adresse_proprietaire", description: "Adresse du propriétaire", location: "owner" },
+  { key: "nom_bien", description: "Nom du bien", location: "property" },
+  { key: "adresse_bien", description: "Adresse du bien", location: "property" },
+  { key: "ville_bien", description: "Ville du bien", location: "property" },
+  { key: "code_postal_bien", description: "Code postal du bien", location: "property" },
+  {
+    key: "numero_lot",
+    description: "Numéro de lot / box (si renseigné sur le bien)",
+    location: "property",
+  },
+  { key: "type_bail", description: "Type de bail", location: "lease" },
+  {
+    key: "nombre_cles",
+    description: "Nombre de clés remises (si renseigné sur le bail)",
+    location: "lease",
+  },
+  {
+    key: "nombre_badges",
+    description: "Nombre de badges remis (si renseigné sur le bail)",
+    location: "lease",
+  },
+  {
+    key: "ville_signature",
+    description: "Ville de signature (si renseignée sur le bail)",
+    location: "lease",
+  },
+  { key: "loyer", description: "Loyer mensuel hors charges", location: "lease" },
+  { key: "charges", description: "Charges mensuelles", location: "lease" },
+  { key: "depot_garantie", description: "Dépôt de garantie", location: "lease" },
+  { key: "jour_paiement_loyer", description: "Jour du mois où le loyer est dû", location: "lease" },
+  {
+    key: "indice_irl",
+    description: "Indice IRL/ICC de référence (si renseigné sur le bail)",
+    location: "lease",
+  },
+  {
+    key: "prochaine_revision_loyer",
+    description: "Date de la prochaine révision du loyer (si connue)",
+    location: "lease",
+  },
+  { key: "date_debut_bail", description: "Date de début du bail", location: "lease" },
+  { key: "date_fin_bail", description: "Date de fin du bail (si connue)", location: "lease" },
+  { key: "date_du_jour", description: "Date du jour de génération", location: "computed" },
 ];
