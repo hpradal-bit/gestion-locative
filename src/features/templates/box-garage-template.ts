@@ -64,7 +64,7 @@ En cas de non-paiement du loyer ou des charges à leur échéance, le Bailleur a
 
 ARTICLE 13 — RÉSILIATION ET RESTITUTION
 
-Chaque partie peut mettre fin au contrat par lettre recommandée avec accusé de réception, sous réserve d'un préavis d'un mois pour le Locataire et d'un mois pour le Bailleur, courant à compter de la première présentation de la lettre. Le contrat pourra également être résilié de façon anticipée en cas de manquement grave de l'une des parties à ses obligations, non couvert par la clause résolutoire de l'article 12, dans les conditions de l'article 1224 du Code civil. En fin de contrat, le Locataire restitue le bien vidé de tout bien personnel, avec les clés et badges remis à l'entrée, et se soumet à l'état des lieux de sortie prévu à l'article 7.
+Chaque partie peut mettre fin au contrat par lettre recommandée avec accusé de réception, sous réserve d'un préavis de {{preavis_mois}} mois, courant à compter de la première présentation de la lettre. Le contrat pourra également être résilié de façon anticipée en cas de manquement grave de l'une des parties à ses obligations, non couvert par la clause résolutoire de l'article 12, dans les conditions de l'article 1224 du Code civil. En fin de contrat, le Locataire restitue le bien vidé de tout bien personnel, avec les clés et badges remis à l'entrée, et se soumet à l'état des lieux de sortie prévu à l'article 7.
 
 ARTICLE 14 — NOTIFICATIONS ET LITIGES
 

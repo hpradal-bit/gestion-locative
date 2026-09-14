@@ -65,6 +65,7 @@ export async function buildLeaseTemplateVariables(
     charges: formatCurrency(lease.charges),
     depot_garantie: formatCurrency(lease.security_deposit),
     jour_paiement_loyer: String(lease.payment_due_day),
+    preavis_mois: String(lease.notice_period_months),
     indice_irl: lease.irl_index ?? "",
     prochaine_revision_loyer: lease.next_revision_date
       ? new Date(lease.next_revision_date).toLocaleDateString("fr-FR")

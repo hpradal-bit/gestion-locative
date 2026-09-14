@@ -180,6 +180,7 @@ export type Database = {
           keys_count: number | null
           lease_type: string | null
           next_revision_date: string | null
+          notice_period_months: number
           payment_due_day: number
           payment_method: string | null
           property_id: string
@@ -207,6 +208,7 @@ export type Database = {
           keys_count?: number | null
           lease_type?: string | null
           next_revision_date?: string | null
+          notice_period_months?: number
           payment_due_day?: number
           payment_method?: string | null
           property_id: string
@@ -234,6 +236,7 @@ export type Database = {
           keys_count?: number | null
           lease_type?: string | null
           next_revision_date?: string | null
+          notice_period_months?: number
           payment_due_day?: number
           payment_method?: string | null
           property_id?: string

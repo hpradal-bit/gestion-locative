@@ -104,6 +104,7 @@ export const LEASE_TEMPLATE_VARIABLES: {
   { key: "charges", description: "Charges mensuelles", location: "lease" },
   { key: "depot_garantie", description: "Dépôt de garantie", location: "lease" },
   { key: "jour_paiement_loyer", description: "Jour du mois où le loyer est dû", location: "lease" },
+  { key: "preavis_mois", description: "Durée du préavis de résiliation, en mois", location: "lease" },
   {
     key: "indice_irl",
     description: "Indice IRL/ICC de référence (si renseigné sur le bail)",

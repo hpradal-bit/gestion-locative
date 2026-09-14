@@ -42,6 +42,11 @@ export const leaseSchema = z.object({
     .min(1, "Le jour doit être entre 1 et 31.")
     .max(31, "Le jour doit être entre 1 et 31.")
     .default(1),
+  notice_period_months: z.coerce
+    .number()
+    .int()
+    .min(0, "Le préavis doit être positif ou nul.")
+    .default(2),
   keys_count: z.preprocess(
     (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
     z.coerce.number().int().min(0).optional()

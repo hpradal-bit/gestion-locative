@@ -170,6 +170,17 @@ export function LeaseForm({ tenantId, properties, action, lease, submitLabel }: 
               required
             />
           </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="notice_period_months">Préavis de résiliation (mois)</Label>
+            <Input
+              id="notice_period_months"
+              name="notice_period_months"
+              type="number"
+              min={0}
+              defaultValue={lease?.notice_period_months ?? 2}
+              required
+            />
+          </div>
         </CardContent>
       </Card>
 
