@@ -1,29 +1,27 @@
 import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 
-const NAVY = "#1e3a5f";
-const GOLD = "#b8860b";
-const INK = "#1f2937";
+const INK = "#111111";
+const RULE = "#999999";
 const MUTED = "#6b7280";
 
 const styles = StyleSheet.create({
-  page: { padding: 48, fontSize: 10.5, fontFamily: "Helvetica", color: INK },
+  page: { padding: 48, fontSize: 9.3, fontFamily: "Helvetica", color: INK },
   title: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: 700,
-    color: NAVY,
+    color: INK,
     textAlign: "center",
-    marginBottom: 8,
-    letterSpacing: 0.5,
+    marginBottom: 10,
   },
-  rule: { height: 2, width: 90, backgroundColor: GOLD, marginBottom: 22, alignSelf: "center" },
+  rule: { height: 0.6, backgroundColor: RULE, marginBottom: 22 },
   heading: {
-    fontSize: 11.5,
+    fontSize: 10.5,
     fontWeight: 700,
-    color: NAVY,
-    marginTop: 16,
-    marginBottom: 6,
+    color: INK,
+    marginTop: 12,
+    marginBottom: 5,
   },
-  paragraph: { marginBottom: 9, lineHeight: 1.5, textAlign: "justify" },
+  paragraph: { marginBottom: 9, lineHeight: 1.4, textAlign: "justify" },
   footer: {
     position: "absolute",
     bottom: 24,
