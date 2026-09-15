@@ -76,7 +76,4 @@ Le présent contrat exprime l'intégralité des engagements des parties. Toute m
 
 Fait à {{ville_bien}}, le {{date_du_jour}}
 
-Signature du Bailleur                                    Signature du Locataire
-
-
-Document généré à partir du modèle « Box Garage ». Ce document ne remplace pas une consultation juridique.`;
+Signature du Bailleur                                    Signature du Locataire`;

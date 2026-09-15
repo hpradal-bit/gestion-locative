@@ -194,22 +194,6 @@ export function LeaseReviewForm({
               defaultValue={data.property.surface_m2 ?? ""}
             />
           </Field>
-          <Field id="property_equipment" label="Équipements" missing={missingFieldIds?.has("property_equipment")}>
-            <Input
-              id="property_equipment"
-              name="property_equipment"
-              placeholder="ex : accès sécurisé, porte automatique"
-              defaultValue={data.property.equipment}
-            />
-          </Field>
-          <Field id="property_special_rule" label="Règle particulière de copropriété" missing={missingFieldIds?.has("property_special_rule")}>
-            <Input
-              id="property_special_rule"
-              name="property_special_rule"
-              placeholder="ex : accès interdit entre 23h et 6h sauf urgence"
-              defaultValue={data.property.special_rule}
-            />
-          </Field>
         </div>
       </div>
 

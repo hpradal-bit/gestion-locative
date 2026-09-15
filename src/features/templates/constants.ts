@@ -74,16 +74,6 @@ export const LEASE_TEMPLATE_VARIABLES: {
     description: "Surface approximative du bien (si renseignée)",
     location: "property",
   },
-  {
-    key: "equipements_bien",
-    description: "Équipements du bien (si renseignés)",
-    location: "property",
-  },
-  {
-    key: "regle_particuliere",
-    description: "Règle particulière de copropriété (si renseignée)",
-    location: "property",
-  },
   { key: "type_bail", description: "Type de bail", location: "lease" },
   {
     key: "nombre_cles",
@@ -175,8 +165,6 @@ export const VARIABLE_REVIEW_FIELD: Record<string, string> = {
   numero_lot: "property_lot_number",
   batiment_niveau: "property_building_level",
   surface_bien: "property_surface_m2",
-  equipements_bien: "property_equipment",
-  regle_particuliere: "property_special_rule",
   type_bail: "lease_lease_type",
   loyer: "lease_initial_rent",
   charges: "lease_charges",

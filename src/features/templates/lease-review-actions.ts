@@ -29,8 +29,6 @@ export type LeaseReviewData = {
     lot_number: string;
     building_level: string;
     surface_m2: number | null;
-    equipment: string;
-    special_rule: string;
   };
   lease: {
     id: string;
@@ -108,8 +106,6 @@ export async function getLeaseReviewData(leaseId: string): Promise<LeaseReviewDa
       lot_number: property.lot_number ?? "",
       building_level: property.building_level ?? "",
       surface_m2: property.surface_m2,
-      equipment: property.equipment ?? "",
-      special_rule: property.special_rule ?? "",
     },
     lease: {
       id: lease.id,
@@ -188,8 +184,6 @@ export async function saveLeaseReviewData(
       lot_number: true,
       building_level: true,
       surface_m2: true,
-      equipment: true,
-      special_rule: true,
     })
     .safeParse(extract(formData, "property_"));
   const leaseParsed = leaseSchema
