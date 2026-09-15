@@ -4,13 +4,15 @@ import { extractTemplateVariables } from "@/lib/templates";
 import { getTemplate } from "./queries";
 import { buildLeaseTemplateVariables } from "./lease-variables";
 import { getLease } from "@/features/leases/queries";
-import { LEASE_TEMPLATE_VARIABLES, VARIABLE_LOCATION_LABELS } from "./constants";
+import { LEASE_TEMPLATE_VARIABLES, VARIABLE_LOCATION_LABELS, VARIABLE_REVIEW_FIELD } from "./constants";
 
 export type MissingVariable = {
   key: string;
   description: string;
   locationLabel: string;
   href: string;
+  /** Identifiant du champ à mettre en évidence dans l'écran de relecture, si applicable. */
+  fieldId?: string;
 };
 
 function hrefForLocation(
@@ -63,6 +65,7 @@ export async function checkMissingVariables(
       description: definition.description,
       locationLabel: VARIABLE_LOCATION_LABELS[definition.location],
       href,
+      fieldId: VARIABLE_REVIEW_FIELD[key],
     });
   }
 

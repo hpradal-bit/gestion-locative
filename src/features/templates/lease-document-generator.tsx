@@ -46,6 +46,10 @@ export function LeaseDocumentGenerator({
   const [checkVersion, setCheckVersion] = React.useState(0);
 
   const ready = Boolean(templateId && leaseId);
+  const missingFieldIds = React.useMemo(
+    () => new Set(missing?.map((item) => item.fieldId).filter((id): id is string => Boolean(id))),
+    [missing]
+  );
 
   React.useEffect(() => {
     if (!templateId || !leaseId) return;
@@ -192,7 +196,11 @@ export function LeaseDocumentGenerator({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <LeaseReviewForm leaseId={leaseId} onSaved={() => setCheckVersion((v) => v + 1)} />
+            <LeaseReviewForm
+              leaseId={leaseId}
+              missingFieldIds={missingFieldIds}
+              onSaved={() => setCheckVersion((v) => v + 1)}
+            />
           </CardContent>
         </Card>
       )}

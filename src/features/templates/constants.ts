@@ -149,3 +149,38 @@ export const LEASE_TEMPLATE_VARIABLES: {
   },
   { key: "date_du_jour", description: "Date du jour de génération", location: "computed" },
 ];
+
+/**
+ * Pour les variables reprises dans l'écran de relecture d'un bail
+ * (propriétaire / locataire / bien / bail), l'identifiant du champ à
+ * mettre en évidence quand la variable est manquante. Les variables sans
+ * champ correspondant ici (surface, équipements, etc.) restent signalées
+ * uniquement via le lien vers leur fiche d'origine.
+ */
+export const VARIABLE_REVIEW_FIELD: Record<string, string> = {
+  nom_locataire: "tenant_last_name",
+  prenom_locataire: "tenant_first_name",
+  email_locataire: "tenant_email",
+  telephone_locataire: "tenant_phone",
+  adresse_locataire: "tenant_address",
+  date_naissance_locataire: "tenant_birth_date",
+  nom_proprietaire: "owner_full_name",
+  email_proprietaire: "owner_email",
+  telephone_proprietaire: "owner_phone",
+  adresse_proprietaire: "owner_address",
+  nom_bien: "property_name",
+  adresse_bien: "property_address",
+  ville_bien: "property_city",
+  code_postal_bien: "property_postal_code",
+  numero_lot: "property_lot_number",
+  type_bail: "lease_lease_type",
+  loyer: "lease_initial_rent",
+  charges: "lease_charges",
+  depot_garantie: "lease_security_deposit",
+  jour_paiement_loyer: "lease_payment_due_day",
+  preavis_mois: "lease_notice_period_months",
+  indice_irl: "lease_irl_index",
+  prochaine_revision_loyer: "lease_next_revision_date",
+  date_debut_bail: "lease_start_date",
+  date_fin_bail: "lease_end_date",
+};
