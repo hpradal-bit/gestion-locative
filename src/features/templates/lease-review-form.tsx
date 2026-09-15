@@ -150,6 +150,9 @@ export function LeaseReviewForm({
           <Field id="tenant_birth_date" label="Date de naissance" missing={missingFieldIds?.has("tenant_birth_date")}>
             <Input id="tenant_birth_date" name="tenant_birth_date" type="date" defaultValue={data.tenant.birth_date} />
           </Field>
+          <Field id="tenant_birth_place" label="Lieu de naissance" missing={missingFieldIds?.has("tenant_birth_place")}>
+            <Input id="tenant_birth_place" name="tenant_birth_place" placeholder="ex : Lyon (69)" defaultValue={data.tenant.birth_place} />
+          </Field>
         </div>
       </div>
 
@@ -172,6 +175,40 @@ export function LeaseReviewForm({
           </Field>
           <Field id="property_postal_code" label="Code postal" missing={missingFieldIds?.has("property_postal_code")}>
             <Input id="property_postal_code" name="property_postal_code" defaultValue={data.property.postal_code} />
+          </Field>
+          <Field id="property_building_level" label="Bâtiment / niveau" missing={missingFieldIds?.has("property_building_level")}>
+            <Input
+              id="property_building_level"
+              name="property_building_level"
+              placeholder="ex : Bâtiment B, niveau -1"
+              defaultValue={data.property.building_level}
+            />
+          </Field>
+          <Field id="property_surface_m2" label="Surface (m²)" missing={missingFieldIds?.has("property_surface_m2")}>
+            <Input
+              id="property_surface_m2"
+              name="property_surface_m2"
+              type="number"
+              min={0}
+              step="0.1"
+              defaultValue={data.property.surface_m2 ?? ""}
+            />
+          </Field>
+          <Field id="property_equipment" label="Équipements" missing={missingFieldIds?.has("property_equipment")}>
+            <Input
+              id="property_equipment"
+              name="property_equipment"
+              placeholder="ex : accès sécurisé, porte automatique"
+              defaultValue={data.property.equipment}
+            />
+          </Field>
+          <Field id="property_special_rule" label="Règle particulière de copropriété" missing={missingFieldIds?.has("property_special_rule")}>
+            <Input
+              id="property_special_rule"
+              name="property_special_rule"
+              placeholder="ex : accès interdit entre 23h et 6h sauf urgence"
+              defaultValue={data.property.special_rule}
+            />
           </Field>
         </div>
       </div>
@@ -235,6 +272,63 @@ export function LeaseReviewForm({
               min={0}
               defaultValue={data.lease.notice_period_months}
               required
+            />
+          </Field>
+          <Field id="lease_keys_count" label="Nombre de clés" missing={missingFieldIds?.has("lease_keys_count")}>
+            <Input id="lease_keys_count" name="lease_keys_count" type="number" min={0} defaultValue={data.lease.keys_count ?? ""} />
+          </Field>
+          <Field id="lease_badges_count" label="Nombre de badges" missing={missingFieldIds?.has("lease_badges_count")}>
+            <Input id="lease_badges_count" name="lease_badges_count" type="number" min={0} defaultValue={data.lease.badges_count ?? ""} />
+          </Field>
+          <Field id="lease_signature_city" label="Ville de signature" missing={missingFieldIds?.has("lease_signature_city")}>
+            <Input id="lease_signature_city" name="lease_signature_city" placeholder="ex : Paris" defaultValue={data.lease.signature_city} />
+          </Field>
+          <Field id="lease_authorized_use" label="Usage autorisé" missing={missingFieldIds?.has("lease_authorized_use")}>
+            <Input
+              id="lease_authorized_use"
+              name="lease_authorized_use"
+              placeholder="ex : le stationnement d'un véhicule"
+              defaultValue={data.lease.authorized_use}
+            />
+          </Field>
+          <Field id="lease_payment_method" label="Mode de paiement du loyer" missing={missingFieldIds?.has("lease_payment_method")}>
+            <Input
+              id="lease_payment_method"
+              name="lease_payment_method"
+              placeholder="ex : virement bancaire"
+              defaultValue={data.lease.payment_method}
+            />
+          </Field>
+          <Field id="lease_deposit_payment_method" label="Mode de versement du dépôt" missing={missingFieldIds?.has("lease_deposit_payment_method")}>
+            <Input
+              id="lease_deposit_payment_method"
+              name="lease_deposit_payment_method"
+              placeholder="ex : virement bancaire"
+              defaultValue={data.lease.deposit_payment_method}
+            />
+          </Field>
+          <Field id="lease_condition_at_handover" label="État du bien à la remise" missing={missingFieldIds?.has("lease_condition_at_handover")}>
+            <Input
+              id="lease_condition_at_handover"
+              name="lease_condition_at_handover"
+              placeholder="ex : bon état général, porte fonctionnelle"
+              defaultValue={data.lease.condition_at_handover}
+            />
+          </Field>
+          <Field id="lease_charges_detail" label="Détail des charges" missing={missingFieldIds?.has("lease_charges_detail")}>
+            <Input
+              id="lease_charges_detail"
+              name="lease_charges_detail"
+              placeholder="ex : entretien du portail et de l'éclairage commun"
+              defaultValue={data.lease.charges_detail}
+            />
+          </Field>
+          <Field id="lease_sale_clause_reserve" label="Réserve en cas de vente (facultatif)" missing={missingFieldIds?.has("lease_sale_clause_reserve")}>
+            <Input
+              id="lease_sale_clause_reserve"
+              name="lease_sale_clause_reserve"
+              placeholder="ex : aucun droit de résiliation anticipée en cas de vente"
+              defaultValue={data.lease.sale_clause_reserve}
             />
           </Field>
         </div>

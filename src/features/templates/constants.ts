@@ -151,11 +151,10 @@ export const LEASE_TEMPLATE_VARIABLES: {
 ];
 
 /**
- * Pour les variables reprises dans l'écran de relecture d'un bail
- * (propriétaire / locataire / bien / bail), l'identifiant du champ à
- * mettre en évidence quand la variable est manquante. Les variables sans
- * champ correspondant ici (surface, équipements, etc.) restent signalées
- * uniquement via le lien vers leur fiche d'origine.
+ * Pour chaque variable disponible pour un bail, l'identifiant du champ à
+ * mettre en évidence dans l'écran de relecture quand elle est manquante —
+ * une entrée pour chaque variable non calculée : tout ce qui alimente un
+ * bail a un champ à corriger au même endroit.
  */
 export const VARIABLE_REVIEW_FIELD: Record<string, string> = {
   nom_locataire: "tenant_last_name",
@@ -164,6 +163,7 @@ export const VARIABLE_REVIEW_FIELD: Record<string, string> = {
   telephone_locataire: "tenant_phone",
   adresse_locataire: "tenant_address",
   date_naissance_locataire: "tenant_birth_date",
+  lieu_naissance_locataire: "tenant_birth_place",
   nom_proprietaire: "owner_full_name",
   email_proprietaire: "owner_email",
   telephone_proprietaire: "owner_phone",
@@ -173,6 +173,10 @@ export const VARIABLE_REVIEW_FIELD: Record<string, string> = {
   ville_bien: "property_city",
   code_postal_bien: "property_postal_code",
   numero_lot: "property_lot_number",
+  batiment_niveau: "property_building_level",
+  surface_bien: "property_surface_m2",
+  equipements_bien: "property_equipment",
+  regle_particuliere: "property_special_rule",
   type_bail: "lease_lease_type",
   loyer: "lease_initial_rent",
   charges: "lease_charges",
@@ -183,4 +187,13 @@ export const VARIABLE_REVIEW_FIELD: Record<string, string> = {
   prochaine_revision_loyer: "lease_next_revision_date",
   date_debut_bail: "lease_start_date",
   date_fin_bail: "lease_end_date",
+  nombre_cles: "lease_keys_count",
+  nombre_badges: "lease_badges_count",
+  ville_signature: "lease_signature_city",
+  etat_bien_remise: "lease_condition_at_handover",
+  usage_autorise: "lease_authorized_use",
+  mode_paiement_loyer: "lease_payment_method",
+  detail_charges: "lease_charges_detail",
+  mode_versement_depot: "lease_deposit_payment_method",
+  reserve_vente: "lease_sale_clause_reserve",
 };

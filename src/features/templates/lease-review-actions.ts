@@ -18,8 +18,20 @@ export type LeaseReviewData = {
     phone: string;
     address: string;
     birth_date: string;
+    birth_place: string;
   };
-  property: { id: string; name: string; address: string; city: string; postal_code: string; lot_number: string };
+  property: {
+    id: string;
+    name: string;
+    address: string;
+    city: string;
+    postal_code: string;
+    lot_number: string;
+    building_level: string;
+    surface_m2: number | null;
+    equipment: string;
+    special_rule: string;
+  };
   lease: {
     id: string;
     start_date: string;
@@ -32,6 +44,15 @@ export type LeaseReviewData = {
     next_revision_date: string;
     payment_due_day: number;
     notice_period_months: number;
+    keys_count: number | null;
+    badges_count: number | null;
+    signature_city: string;
+    condition_at_handover: string;
+    authorized_use: string;
+    payment_method: string;
+    charges_detail: string;
+    deposit_payment_method: string;
+    sale_clause_reserve: string;
   };
 };
 
@@ -76,6 +97,7 @@ export async function getLeaseReviewData(leaseId: string): Promise<LeaseReviewDa
       phone: tenant.phone ?? "",
       address: tenant.address ?? "",
       birth_date: tenant.birth_date ?? "",
+      birth_place: tenant.birth_place ?? "",
     },
     property: {
       id: property.id,
@@ -84,6 +106,10 @@ export async function getLeaseReviewData(leaseId: string): Promise<LeaseReviewDa
       city: property.city ?? "",
       postal_code: property.postal_code ?? "",
       lot_number: property.lot_number ?? "",
+      building_level: property.building_level ?? "",
+      surface_m2: property.surface_m2,
+      equipment: property.equipment ?? "",
+      special_rule: property.special_rule ?? "",
     },
     lease: {
       id: lease.id,
@@ -97,6 +123,15 @@ export async function getLeaseReviewData(leaseId: string): Promise<LeaseReviewDa
       next_revision_date: lease.next_revision_date ?? "",
       payment_due_day: lease.payment_due_day,
       notice_period_months: lease.notice_period_months,
+      keys_count: lease.keys_count,
+      badges_count: lease.badges_count,
+      signature_city: lease.signature_city ?? "",
+      condition_at_handover: lease.condition_at_handover ?? "",
+      authorized_use: lease.authorized_use ?? "",
+      payment_method: lease.payment_method ?? "",
+      charges_detail: lease.charges_detail ?? "",
+      deposit_payment_method: lease.deposit_payment_method ?? "",
+      sale_clause_reserve: lease.sale_clause_reserve ?? "",
     },
   };
 }
@@ -134,10 +169,28 @@ export async function saveLeaseReviewData(
     .pick({ full_name: true, address: true, city: true, postal_code: true, email: true, phone: true })
     .safeParse(extract(formData, "owner_"));
   const tenantParsed = tenantSchema
-    .pick({ first_name: true, last_name: true, email: true, phone: true, address: true, birth_date: true })
+    .pick({
+      first_name: true,
+      last_name: true,
+      email: true,
+      phone: true,
+      address: true,
+      birth_date: true,
+      birth_place: true,
+    })
     .safeParse(extract(formData, "tenant_"));
   const propertyParsed = propertySchema
-    .pick({ name: true, address: true, city: true, postal_code: true, lot_number: true })
+    .pick({
+      name: true,
+      address: true,
+      city: true,
+      postal_code: true,
+      lot_number: true,
+      building_level: true,
+      surface_m2: true,
+      equipment: true,
+      special_rule: true,
+    })
     .safeParse(extract(formData, "property_"));
   const leaseParsed = leaseSchema
     .pick({
@@ -151,6 +204,15 @@ export async function saveLeaseReviewData(
       next_revision_date: true,
       payment_due_day: true,
       notice_period_months: true,
+      keys_count: true,
+      badges_count: true,
+      signature_city: true,
+      condition_at_handover: true,
+      authorized_use: true,
+      payment_method: true,
+      charges_detail: true,
+      deposit_payment_method: true,
+      sale_clause_reserve: true,
     })
     .safeParse(extract(formData, "lease_"));
 
