@@ -187,9 +187,9 @@ function renderBlock(block: DocumentBlock, key: string | number, signatures: Gen
                 <View style={styles.signatureBox}>
                   {info ? (
                     <Text style={styles.signatureScript}>{info.name}</Text>
-                  ) : (
+                  ) : signatures ? (
                     <Text style={styles.signaturePending}>En attente de signature</Text>
-                  )}
+                  ) : null}
                 </View>
                 {info && <Text style={styles.signatureMeta}>Signé le {info.signedAt}</Text>}
               </View>
