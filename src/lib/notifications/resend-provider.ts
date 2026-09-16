@@ -34,12 +34,15 @@ export class ResendEmailProvider implements EmailProvider {
       });
 
       if (!response.ok) {
-        return { success: false, error: GENERIC_ERROR };
+        const body = await response.json().catch(() => null);
+        const detail = body && typeof body === "object" && "message" in body ? String(body.message) : null;
+        return { success: false, error: detail ? `${GENERIC_ERROR} (${detail})` : GENERIC_ERROR };
       }
 
       return { success: true };
-    } catch {
-      return { success: false, error: GENERIC_ERROR };
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : null;
+      return { success: false, error: detail ? `${GENERIC_ERROR} (${detail})` : GENERIC_ERROR };
     }
   }
 }

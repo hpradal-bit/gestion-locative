@@ -96,11 +96,19 @@ export async function createSignatureRequest(
   const tenantSignUrl = `${baseUrl}/signer/${request.tenant_token}`;
 
   const provider = getEmailProvider();
-  await provider.sendEmail({
+  const tenantEmailResult = await provider.sendEmail({
     to: lease.tenants.email,
     subject: `${template.name} — à signer`,
     html: `<p>Bonjour ${tenantFullName},</p><p>${ownerProfile.full_name} vous invite à signer électroniquement le document « ${template.name} » pour ${lease.properties.name}.</p><p><a href="${tenantSignUrl}">Cliquez ici pour consulter et signer le document</a></p><p>Cordialement,<br/>${ownerProfile.full_name}</p>`,
   });
+
+  if (!tenantEmailResult.success) {
+    // La demande existe déjà en base (le lien fonctionne), mais l'email n'est pas parti :
+    // on le signale plutôt que de laisser croire que le locataire l'a reçu.
+    return {
+      error: `${tenantEmailResult.error ?? "Impossible d'envoyer l'email."} Le lien reste valide : ${tenantSignUrl}`,
+    };
+  }
 
   if (ownerProfile.email) {
     await provider.sendEmail({
