@@ -13,6 +13,7 @@ import { listDocumentsForEntity } from "./queries";
 import { deleteDocument } from "./actions";
 import { UploadDialog } from "./upload-dialog";
 import { DownloadButton } from "./download-button";
+import { OpenDocumentName } from "./open-document-name";
 import { AnalyzeDocumentDialog } from "./analyze-document-dialog";
 import { DOCUMENT_TYPE_LABELS } from "./constants";
 import type { documentEntityTypes, documentTypes } from "./schema";
@@ -62,7 +63,7 @@ export async function DocumentsSection({
               >
                 <div className="flex min-w-0 items-center gap-3">
                   <FileText className="size-4 shrink-0 text-muted-foreground" />
-                  <div className="min-w-0">
+                  <OpenDocumentName storagePath={doc.storage_path}>
                     <p className="truncate text-sm font-medium">{doc.file_name}</p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Badge variant="secondary">
@@ -71,7 +72,7 @@ export async function DocumentsSection({
                       </Badge>
                       {formatSize(doc.size_bytes)}
                     </div>
-                  </div>
+                  </OpenDocumentName>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   {entityType === "lease" && (
