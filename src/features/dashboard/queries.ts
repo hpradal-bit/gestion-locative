@@ -322,12 +322,19 @@ export async function getDashboardData(propertyId?: string): Promise<DashboardDa
   const tmiRate = ownerProfile?.tmi_rate ?? 0.3;
   const applySocialCharges = ownerProfile?.social_charges_applicable ?? true;
 
-  const rentByProperty = new Map<string, number>();
+  // Un bien n'a normalement qu'un seul bail actif à la fois ; si plusieurs
+  // baux actifs existent malgré tout pour le même bien (saisie en double),
+  // on ne retient que le plus récent plutôt que de sommer leurs loyers.
+  const latestLeaseByProperty = new Map<string, (typeof leaseRows)[number]>();
   for (const lease of leaseRows) {
-    rentByProperty.set(
-      lease.property_id,
-      (rentByProperty.get(lease.property_id) ?? 0) + (lease.initial_rent + lease.charges) * 12
-    );
+    const current = latestLeaseByProperty.get(lease.property_id);
+    if (!current || lease.start_date > current.start_date) {
+      latestLeaseByProperty.set(lease.property_id, lease);
+    }
+  }
+  const rentByProperty = new Map<string, number>();
+  for (const lease of latestLeaseByProperty.values()) {
+    rentByProperty.set(lease.property_id, (lease.initial_rent + lease.charges) * 12);
   }
 
   const expensesByProperty = new Map<string, number>();

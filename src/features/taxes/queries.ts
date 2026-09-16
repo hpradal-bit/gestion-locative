@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { calculateAmortizationSchedule, estimateTax, type TaxRegime } from "@/lib/finance";
+import { calculateAmortizationSchedule, estimateTax, taxRegimes, type TaxRegime } from "@/lib/finance";
 import { monthsBetween } from "@/lib/date-utils";
 import type { PropertyTaxBreakdown } from "./types";
 
@@ -43,12 +43,19 @@ export async function getPropertyTaxBreakdowns(): Promise<PropertyTaxBreakdown[]
   const tmiRate = ownerProfile?.tmi_rate ?? 0.3;
   const applySocialCharges = ownerProfile?.social_charges_applicable ?? true;
 
-  const rentByProperty = new Map<string, number>();
+  // Un bien n'a normalement qu'un seul bail actif à la fois ; si plusieurs
+  // baux actifs existent malgré tout pour le même bien (saisie en double),
+  // on ne retient que le plus récent plutôt que de sommer leurs loyers.
+  const latestLeaseByProperty = new Map<string, (typeof leaseRows)[number]>();
   for (const lease of leaseRows) {
-    rentByProperty.set(
-      lease.property_id,
-      (rentByProperty.get(lease.property_id) ?? 0) + (lease.initial_rent + lease.charges) * 12
-    );
+    const current = latestLeaseByProperty.get(lease.property_id);
+    if (!current || lease.start_date > current.start_date) {
+      latestLeaseByProperty.set(lease.property_id, lease);
+    }
+  }
+  const rentByProperty = new Map<string, number>();
+  for (const lease of latestLeaseByProperty.values()) {
+    rentByProperty.set(lease.property_id, (lease.initial_rent + lease.charges) * 12);
   }
 
   const expensesByProperty = new Map<string, number>();
@@ -102,6 +109,21 @@ export async function getPropertyTaxBreakdowns(): Promise<PropertyTaxBreakdown[]
         })
       : null;
 
+    // Simulation des 4 régimes avec les mêmes données réelles du bien, pour
+    // que l'utilisateur puisse comparer avant de choisir — indépendant du
+    // régime effectivement retenu sur la fiche du bien.
+    const simulations = taxRegimes.map((regime) => ({
+      regime,
+      estimate: estimateTax({
+        regime,
+        grossAnnualRent,
+        deductibleExpenses,
+        amortization,
+        tmiRate,
+        applySocialCharges,
+      }),
+    }));
+
     return {
       propertyId: property.id,
       propertyName: property.name,
@@ -115,6 +137,7 @@ export async function getPropertyTaxBreakdowns(): Promise<PropertyTaxBreakdown[]
       tmiRate,
       applySocialCharges,
       estimate,
+      simulations,
     };
   });
 }

@@ -14,4 +14,6 @@ export type PropertyTaxBreakdown = {
   applySocialCharges: boolean;
   /** null tant qu'aucun régime fiscal n'est renseigné sur le bien. */
   estimate: TaxEstimate | null;
+  /** Simulation des 4 régimes avec les données réelles du bien, pour comparer avant de choisir. */
+  simulations: { regime: TaxRegime; estimate: TaxEstimate }[];
 };

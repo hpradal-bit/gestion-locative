@@ -4,7 +4,8 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getPropertyTaxBreakdowns } from "@/features/taxes/queries";
-import { PropertyTaxCard } from "@/features/taxes/property-tax-card";
+import { RegimeSimulationCard } from "@/features/taxes/regime-simulation-card";
+import { RegimeSelectorCard } from "@/features/taxes/regime-selector-card";
 import { DeclarationGuideCard } from "@/features/taxes/declaration-guide-card";
 import { DECLARATION_GUIDE } from "@/features/taxes/declaration-guide";
 import { taxRegimes } from "@/lib/finance";
@@ -44,15 +45,30 @@ export default async function ImpotsPage() {
         description="Comprendre, bien par bien, comment votre impôt est calculé — et comment le déclarer."
       />
 
-      <Tabs defaultValue="detail">
+      <Tabs defaultValue="simulation">
         <TabsList>
-          <TabsTrigger value="detail">Détail par bien</TabsTrigger>
+          <TabsTrigger value="simulation">Simulation</TabsTrigger>
+          <TabsTrigger value="regime">Choisir le régime</TabsTrigger>
           <TabsTrigger value="guide">Guide de déclaration</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="detail" className="flex flex-col gap-4">
+        <TabsContent value="simulation" className="flex flex-col gap-4">
+          <p className="text-sm text-muted-foreground">
+            Pour chaque bien, comparez les 4 régimes fiscaux avec ses revenus et charges réels.
+            Cliquez sur une case pour en voir le détail du calcul.
+          </p>
           {breakdowns.map((breakdown) => (
-            <PropertyTaxCard key={breakdown.propertyId} breakdown={breakdown} />
+            <RegimeSimulationCard key={breakdown.propertyId} breakdown={breakdown} />
+          ))}
+        </TabsContent>
+
+        <TabsContent value="regime" className="flex flex-col gap-4">
+          <p className="text-sm text-muted-foreground">
+            Choisissez le régime fiscal retenu pour chaque bien — il sera utilisé pour toutes vos
+            estimations (tableau de bord, rentabilité, cash-flow après impôt).
+          </p>
+          {breakdowns.map((breakdown) => (
+            <RegimeSelectorCard key={breakdown.propertyId} breakdown={breakdown} />
           ))}
         </TabsContent>
 
