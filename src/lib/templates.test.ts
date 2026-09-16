@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { extractTemplateVariables, renderTemplate } from "./templates";
+import { extractTemplateVariables, renderTemplate, renderTemplateWithEmphasis } from "./templates";
+import { splitEmphasis } from "./emphasis";
 
 describe("renderTemplate", () => {
   it("remplace les variables connues", () => {
@@ -24,6 +25,27 @@ describe("renderTemplate", () => {
   it("remplace plusieurs occurrences de la même variable", () => {
     const result = renderTemplate("{{loyer}} et encore {{loyer}}", { loyer: "850" });
     expect(result).toBe("850 et encore 850");
+  });
+});
+
+describe("renderTemplateWithEmphasis", () => {
+  it("entoure les valeurs injectées de marqueurs récupérables par splitEmphasis", () => {
+    const result = renderTemplateWithEmphasis("Bonjour {{nom_locataire}}, loyer : {{loyer}} €.", {
+      nom_locataire: "Jean Dupont",
+      loyer: "850",
+    });
+    expect(splitEmphasis(result)).toEqual([
+      { text: "Bonjour ", bold: false },
+      { text: "Jean Dupont", bold: true },
+      { text: ", loyer : ", bold: false },
+      { text: "850", bold: true },
+      { text: " €.", bold: false },
+    ]);
+  });
+
+  it("laisse intactes les variables inconnues, sans les marquer", () => {
+    const result = renderTemplateWithEmphasis("Adresse : {{adresse_bien}}", {});
+    expect(splitEmphasis(result)).toEqual([{ text: "Adresse : {{adresse_bien}}", bold: false }]);
   });
 });
 

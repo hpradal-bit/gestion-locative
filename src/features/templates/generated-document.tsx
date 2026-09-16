@@ -1,7 +1,9 @@
 import path from "node:path";
 import { Document, Page, StyleSheet, Text, View, Font } from "@react-pdf/renderer";
+import type { StyleProp } from "@react-pdf/types";
 
-import { parseDocumentBlocks, type DocumentBlock } from "@/lib/document-blocks";
+import { parseDocumentBlocks, groupByHeading, type DocumentBlock } from "@/lib/document-blocks";
+import { splitEmphasis } from "@/lib/emphasis";
 
 const NAVY = "#1c2b45";
 const INK = "#1f2430";
@@ -73,6 +75,7 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   panelText: { fontSize: 9.2, lineHeight: 1.3 },
+  panelTextBold: { fontFamily: "Times-Bold" },
   headingRow: { flexDirection: "row", alignItems: "center", marginTop: 9, marginBottom: 4 },
   headingBullet: { width: 5, height: 5, backgroundColor: NAVY, marginRight: 7 },
   heading: {
@@ -83,6 +86,7 @@ const styles = StyleSheet.create({
   },
   headingRule: { height: 0.6, backgroundColor: LINE, marginBottom: 6 },
   paragraph: { marginBottom: 6, lineHeight: 1.32, textAlign: "justify" },
+  paragraphBold: { fontFamily: "Times-Bold" },
   signatureRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 18, gap: 20 },
   signatureCol: { flex: 1 },
   signatureLabel: { fontSize: 8.5, fontFamily: "Helvetica-Bold", color: NAVY, marginBottom: 6 },
@@ -141,6 +145,23 @@ function signatureInfoFor(label: string, signatures: GeneratedDocumentProps["sig
   return /bailleur/i.test(label) ? signatures.owner : signatures.tenant;
 }
 
+/** Rend un texte marqué (lib/emphasis) en alternant portions normales et en gras. */
+function Runs({ text, boldStyle }: { text: string; boldStyle: StyleProp }) {
+  return (
+    <>
+      {splitEmphasis(text).map((run, index) =>
+        run.bold ? (
+          <Text key={index} style={boldStyle}>
+            {run.text}
+          </Text>
+        ) : (
+          run.text
+        )
+      )}
+    </>
+  );
+}
+
 function renderBlock(block: DocumentBlock, key: string | number, signatures: GeneratedDocumentProps["signatures"]) {
   switch (block.type) {
     case "heading":
@@ -150,7 +171,8 @@ function renderBlock(block: DocumentBlock, key: string | number, signatures: Gen
             <View style={styles.headingBullet} />
             <Text style={styles.heading}>
               {block.label}
-              {block.rest ? ` — ${block.rest}` : ""}
+              {block.rest ? " — " : ""}
+              {block.rest ? <Runs text={block.rest} boldStyle={styles.heading} /> : null}
             </Text>
           </View>
           <View style={styles.headingRule} />
@@ -173,7 +195,9 @@ function renderBlock(block: DocumentBlock, key: string | number, signatures: Gen
     case "party":
       return (
         <View key={key} style={styles.panel}>
-          <Text style={styles.panelText}>{block.text}</Text>
+          <Text style={styles.panelText}>
+            <Runs text={block.text} boldStyle={styles.panelTextBold} />
+          </Text>
         </View>
       );
     case "signature":
@@ -206,7 +230,7 @@ function renderBlock(block: DocumentBlock, key: string | number, signatures: Gen
     case "paragraph":
       return (
         <Text key={key} style={styles.paragraph}>
-          {block.text}
+          <Runs text={block.text} boldStyle={styles.paragraphBold} />
         </Text>
       );
   }
@@ -219,14 +243,7 @@ export function GeneratedDocument({ title, content, signatures }: GeneratedDocum
   // regroupe avec le(s) bloc(s) qui le suivent immédiatement dans un bloc
   // non sécable (wrap={false}) — soit le groupe entier tient sur la page,
   // soit il bascule en entier au début de la page suivante.
-  const groups: DocumentBlock[][] = [];
-  for (const block of blocks) {
-    if (block.type === "heading" || groups.length === 0) {
-      groups.push([block]);
-    } else {
-      groups[groups.length - 1].push(block);
-    }
-  }
+  const groups = groupByHeading(blocks);
 
   return (
     <Document title={title}>

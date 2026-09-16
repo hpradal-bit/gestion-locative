@@ -8,7 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getEmailProvider } from "@/lib/notifications/resend-provider";
 import { getTemplate } from "@/features/templates/queries";
 import { buildLeaseTemplateVariables } from "@/features/templates/lease-variables";
-import { renderTemplate } from "@/lib/templates";
+import { renderTemplateWithEmphasis } from "@/lib/templates";
 import { GeneratedDocument } from "@/features/templates/generated-document";
 import { signerNameSchema } from "./schema";
 import type { Tables } from "@/lib/supabase/database.types";
@@ -71,7 +71,7 @@ export async function createSignatureRequest(
     return { error: "Renseignez vos coordonnées (nom complet) dans Paramètres avant l'envoi." };
   }
 
-  const content = renderTemplate(template.content, variables);
+  const content = renderTemplateWithEmphasis(template.content, variables);
   const tenantFullName = `${lease.tenants.first_name} ${lease.tenants.last_name}`;
 
   const { data: request, error } = await supabase

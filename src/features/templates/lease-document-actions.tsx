@@ -8,7 +8,7 @@ import { logActivity } from "@/features/activity/log";
 import { getTemplate } from "./queries";
 import { buildLeaseTemplateVariables } from "./lease-variables";
 import { GeneratedDocument } from "./generated-document";
-import { renderTemplate } from "@/lib/templates";
+import { renderTemplateWithEmphasis } from "@/lib/templates";
 
 const GENERIC_ERROR = "Impossible d'envoyer le document. Réessayez.";
 
@@ -43,7 +43,7 @@ export async function sendLeaseDocumentEmail(templateId: string, leaseId: string
     ? await supabase.from("owner_profiles").select("full_name").eq("user_id", user.id).maybeSingle()
     : { data: null };
 
-  const content = renderTemplate(template.content, variables);
+  const content = renderTemplateWithEmphasis(template.content, variables);
   const buffer = await renderToBuffer(<GeneratedDocument title={template.name} content={content} />);
 
   const tenantFullName = `${lease.tenants.first_name} ${lease.tenants.last_name}`;

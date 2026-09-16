@@ -58,3 +58,28 @@ export function parseDocumentBlocks(content: string): DocumentBlock[] {
     return { type: "paragraph", text: paragraph };
   });
 }
+
+/**
+ * Regroupe les blocs par article : chaque groupe démarre à un titre
+ * ("heading") et contient les blocs qui le suivent jusqu'au prochain titre.
+ * Sert à la fois au contrôle de l'orphelin en PDF (le groupe entier bascule
+ * de page ensemble) et à l'encadré visuel de chaque article sur le web.
+ */
+export function groupByHeading(blocks: DocumentBlock[]): DocumentBlock[][] {
+  const groups: DocumentBlock[][] = [];
+  for (const block of blocks) {
+    if (block.type === "heading" || groups.length === 0) {
+      groups.push([block]);
+    } else {
+      groups[groups.length - 1].push(block);
+    }
+  }
+  return groups;
+}
+
+/** "ARTICLE 1" → "Article 1" : les libellés du modèle sont saisis en majuscules. */
+export function toSentenceCase(text: string): string {
+  if (!text) return text;
+  const lower = text.toLowerCase();
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}

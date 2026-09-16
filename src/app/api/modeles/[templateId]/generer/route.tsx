@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getTemplate } from "@/features/templates/queries";
 import { buildLeaseTemplateVariables } from "@/features/templates/lease-variables";
 import { GeneratedDocument } from "@/features/templates/generated-document";
-import { renderTemplate } from "@/lib/templates";
+import { renderTemplateWithEmphasis } from "@/lib/templates";
 import { logActivity } from "@/features/activity/log";
 
 export async function GET(
@@ -29,7 +29,7 @@ export async function GET(
     return NextResponse.json({ error: "Modèle ou bail introuvable." }, { status: 404 });
   }
 
-  const content = renderTemplate(template.content, variables);
+  const content = renderTemplateWithEmphasis(template.content, variables);
   const buffer = await renderToBuffer(<GeneratedDocument title={template.name} content={content} />);
 
   const supabase = await createClient();

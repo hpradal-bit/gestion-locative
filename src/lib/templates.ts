@@ -1,3 +1,5 @@
+import { EMPHASIS_START, EMPHASIS_END } from "./emphasis";
+
 /**
  * Substitue les variables {{cle}} d'un modèle par leur valeur connue.
  * Une variable non fournie est laissée telle quelle dans le texte — plutôt
@@ -7,6 +9,21 @@
 export function renderTemplate(content: string, variables: Record<string, string>): string {
   return content.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (match, key: string) => {
     return key in variables ? variables[key] : match;
+  });
+}
+
+/**
+ * Comme renderTemplate, mais entoure chaque valeur injectée de marqueurs
+ * (lib/emphasis) pour que les rendus du document final la mettent en gras —
+ * propriétaire et locataire repèrent ainsi d'un coup d'œil les informations
+ * issues de l'application, au milieu du texte juridique fixe.
+ */
+export function renderTemplateWithEmphasis(
+  content: string,
+  variables: Record<string, string>
+): string {
+  return content.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (match, key: string) => {
+    return key in variables ? `${EMPHASIS_START}${variables[key]}${EMPHASIS_END}` : match;
   });
 }
 
