@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/format";
-import type { TaxRegime } from "@/lib/finance";
+import { taxRegimes, type TaxRegime } from "@/lib/finance";
 import type { PropertyTaxBreakdown } from "./types";
 import { RegimeSquare } from "./regime-square";
 import { setPropertyTaxRegime } from "./actions";
@@ -42,6 +42,13 @@ export function RegimeSelectorCard({ breakdown }: { breakdown: PropertyTaxBreakd
           Cliquez sur un régime pour le retenir pour ce bien — il sera utilisé pour toutes vos
           estimations d&apos;impôt.
         </p>
+        {breakdown.simulations.length < taxRegimes.length && (
+          <p className="text-xs text-muted-foreground">
+            Les régimes LMNP (location meublée) ne s&apos;appliquent pas à ce bien : un garage, un
+            parking ou un local commercial n&apos;est pas un logement et ne peut pas être
+            « meublé » au sens fiscal.
+          </p>
+        )}
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

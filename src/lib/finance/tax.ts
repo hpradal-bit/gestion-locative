@@ -350,6 +350,23 @@ export function calculateLmnpRealTax(input: {
   };
 }
 
+/**
+ * Le LMNP (location meublée) ne peut s'appliquer qu'à un logement
+ * d'habitation loué meublé — un garage, un parking ou un local commercial
+ * ne sont pas des logements et ne peuvent pas être "meublés" au sens
+ * fiscal. Pour ces biens, seuls les régimes fonciers (location vide)
+ * sont légalement applicables ; les régimes LMNP n'apparaissent donc pas
+ * dans les simulations ni les choix proposés.
+ */
+const NON_DWELLING_PROPERTY_TYPES = new Set(["parking", "local_commercial"]);
+
+export function getApplicableTaxRegimes(propertyType: string | null): TaxRegime[] {
+  if (propertyType && NON_DWELLING_PROPERTY_TYPES.has(propertyType)) {
+    return taxRegimes.filter((regime) => regime === "micro_foncier" || regime === "reel_foncier");
+  }
+  return [...taxRegimes];
+}
+
 export type TaxEstimateInput = {
   regime: TaxRegime;
   grossAnnualRent: number;

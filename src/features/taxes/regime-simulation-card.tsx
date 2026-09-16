@@ -4,12 +4,13 @@ import * as React from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/format";
+import { taxRegimes } from "@/lib/finance";
 import type { PropertyTaxBreakdown } from "./types";
 import { RegimeSquare } from "./regime-square";
 
 /**
- * Comparaison des 4 régimes fiscaux pour un bien, avec les revenus et
- * charges réels du bien — purement informatif, la sélection se fait dans
+ * Comparaison des régimes fiscaux applicables à un bien, avec ses revenus
+ * et charges réels — purement informatif, la sélection se fait dans
  * l'onglet « Choisir le régime ».
  */
 export function RegimeSimulationCard({ breakdown }: { breakdown: PropertyTaxBreakdown }) {
@@ -27,6 +28,13 @@ export function RegimeSimulationCard({ breakdown }: { breakdown: PropertyTaxBrea
           Revenus locatifs annuels retenus : {formatCurrency(breakdown.grossAnnualRent)} — charges et
           intérêts déductibles : {formatCurrency(breakdown.deductibleExpenses)}
         </p>
+        {breakdown.simulations.length < taxRegimes.length && (
+          <p className="text-xs text-muted-foreground">
+            Les régimes LMNP (location meublée) ne s&apos;appliquent pas à ce bien : un garage, un
+            parking ou un local commercial n&apos;est pas un logement et ne peut pas être
+            « meublé » au sens fiscal.
+          </p>
+        )}
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

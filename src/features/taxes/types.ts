@@ -3,6 +3,7 @@ import type { TaxEstimate, TaxRegime } from "@/lib/finance";
 export type PropertyTaxBreakdown = {
   propertyId: string;
   propertyName: string;
+  propertyType: string | null;
   regime: TaxRegime | null;
   grossAnnualRent: number;
   ownCharges: number;
@@ -14,6 +15,6 @@ export type PropertyTaxBreakdown = {
   applySocialCharges: boolean;
   /** null tant qu'aucun régime fiscal n'est renseigné sur le bien. */
   estimate: TaxEstimate | null;
-  /** Simulation des 4 régimes avec les données réelles du bien, pour comparer avant de choisir. */
+  /** Simulation des régimes légalement applicables à ce type de bien, avec ses données réelles. */
   simulations: { regime: TaxRegime; estimate: TaxEstimate }[];
 };

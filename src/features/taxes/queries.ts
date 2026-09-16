@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { calculateAmortizationSchedule, estimateTax, taxRegimes, type TaxRegime } from "@/lib/finance";
+import { calculateAmortizationSchedule, estimateTax, getApplicableTaxRegimes, type TaxRegime } from "@/lib/finance";
 import { monthsBetween } from "@/lib/date-utils";
 import type { PropertyTaxBreakdown } from "./types";
 
@@ -109,10 +109,11 @@ export async function getPropertyTaxBreakdowns(): Promise<PropertyTaxBreakdown[]
         })
       : null;
 
-    // Simulation des 4 régimes avec les mêmes données réelles du bien, pour
-    // que l'utilisateur puisse comparer avant de choisir — indépendant du
-    // régime effectivement retenu sur la fiche du bien.
-    const simulations = taxRegimes.map((regime) => ({
+    // Simulation des régimes légalement applicables à ce type de bien
+    // (le LMNP ne s'applique qu'à un logement loué meublé — jamais à un
+    // garage/parking ni un local commercial), avec ses données réelles.
+    const applicableRegimes = getApplicableTaxRegimes(property.property_type);
+    const simulations = applicableRegimes.map((regime) => ({
       regime,
       estimate: estimateTax({
         regime,
@@ -127,6 +128,7 @@ export async function getPropertyTaxBreakdowns(): Promise<PropertyTaxBreakdown[]
     return {
       propertyId: property.id,
       propertyName: property.name,
+      propertyType: property.property_type,
       regime: (property.tax_regime as TaxRegime | null) ?? null,
       grossAnnualRent,
       ownCharges,

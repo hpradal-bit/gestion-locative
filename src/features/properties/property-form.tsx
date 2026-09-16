@@ -27,7 +27,7 @@ import {
 import type { Tables } from "@/lib/supabase/database.types";
 import { PROPERTY_TYPE_LABELS, TAX_REGIME_LABELS } from "./constants";
 import { propertyTypes } from "./schema";
-import { taxRegimes } from "@/lib/finance/tax";
+import { getApplicableTaxRegimes } from "@/lib/finance/tax";
 import type { PropertyActionState } from "./actions";
 
 type PropertyFormProps = {
@@ -55,7 +55,19 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
     property?.other_acquisition_fees ?? 0
   );
   const [monthlyRent, setMonthlyRent] = React.useState(property?.monthly_rent ?? 0);
+  const [propertyType, setPropertyType] = React.useState(property?.property_type ?? "");
   const [taxRegime, setTaxRegime] = React.useState(property?.tax_regime ?? "");
+
+  // Le LMNP ne s'applique jamais à un garage/parking ni un local commercial :
+  // si le type de bien rend le régime choisi invalide (au chargement ou
+  // après un changement de type), on ignore cette sélection plutôt que de
+  // proposer un régime légalement faux.
+  const applicableTaxRegimes = getApplicableTaxRegimes(propertyType || null);
+  const effectiveTaxRegime = applicableTaxRegimes.includes(
+    taxRegime as (typeof applicableTaxRegimes)[number]
+  )
+    ? taxRegime
+    : "";
 
   const totalProjectCost = calculateTotalProjectCost({
     purchasePrice,
@@ -115,7 +127,7 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="property_type">Type</Label>
-            <Select name="property_type" defaultValue={property?.property_type ?? undefined}>
+            <Select name="property_type" value={propertyType} onValueChange={setPropertyType}>
               <SelectTrigger id="property_type" className="w-full">
                 <SelectValue placeholder="Sélectionner un type" />
               </SelectTrigger>
@@ -298,20 +310,26 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
             <Label htmlFor="tax_regime">Régime fiscal</Label>
-            <Select name="tax_regime" value={taxRegime} onValueChange={setTaxRegime}>
+            <Select name="tax_regime" value={effectiveTaxRegime} onValueChange={setTaxRegime}>
               <SelectTrigger id="tax_regime" className="w-full">
                 <SelectValue placeholder="Non renseigné" />
               </SelectTrigger>
               <SelectContent>
-                {taxRegimes.map((regime) => (
+                {applicableTaxRegimes.map((regime) => (
                   <SelectItem key={regime} value={regime}>
                     {TAX_REGIME_LABELS[regime]}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {applicableTaxRegimes.length < 4 && (
+              <p className="text-xs text-muted-foreground">
+                Un garage, un parking ou un local commercial n&apos;est pas un logement : les
+                régimes LMNP (location meublée) ne s&apos;y appliquent pas.
+              </p>
+            )}
           </div>
-          {taxRegime === "lmnp_reel" && (
+          {effectiveTaxRegime === "lmnp_reel" && (
             <div className="flex flex-col gap-2">
               <Label htmlFor="annual_amortization">Amortissement annuel estimé</Label>
               <MoneyInput

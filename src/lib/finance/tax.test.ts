@@ -6,6 +6,7 @@ import {
   calculateMicroFoncierTax,
   calculateRealFoncierTax,
   estimateTax,
+  getApplicableTaxRegimes,
 } from "./tax";
 
 describe("calculateMicroFoncierTax", () => {
@@ -154,5 +155,28 @@ describe("estimateTax", () => {
     });
     expect(micro.taxableIncome).toBe(7_000);
     expect(reel.taxableIncome).toBe(6_000);
+  });
+});
+
+describe("getApplicableTaxRegimes", () => {
+  it("exclut le LMNP pour un parking/garage, qui n'est pas un logement meublable", () => {
+    expect(getApplicableTaxRegimes("parking")).toEqual(["micro_foncier", "reel_foncier"]);
+  });
+
+  it("exclut le LMNP pour un local commercial", () => {
+    expect(getApplicableTaxRegimes("local_commercial")).toEqual(["micro_foncier", "reel_foncier"]);
+  });
+
+  it("propose les 4 régimes pour un logement d'habitation", () => {
+    expect(getApplicableTaxRegimes("appartement")).toEqual([
+      "micro_foncier",
+      "reel_foncier",
+      "lmnp_micro_bic",
+      "lmnp_reel",
+    ]);
+  });
+
+  it("propose les 4 régimes quand le type n'est pas renseigné", () => {
+    expect(getApplicableTaxRegimes(null)).toHaveLength(4);
   });
 });
