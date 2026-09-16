@@ -643,6 +643,85 @@ export type Database = {
         }
         Relationships: []
       }
+      signature_requests: {
+        Row: {
+          content: string
+          created_at: string
+          document_name: string
+          final_document_id: string | null
+          id: string
+          lease_id: string
+          owner_name: string
+          owner_signed_at: string | null
+          owner_signed_name: string | null
+          owner_token: string
+          template_id: string
+          tenant_name: string
+          tenant_signed_at: string | null
+          tenant_signed_name: string | null
+          tenant_token: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          document_name: string
+          final_document_id?: string | null
+          id?: string
+          lease_id: string
+          owner_name: string
+          owner_signed_at?: string | null
+          owner_signed_name?: string | null
+          owner_token?: string
+          template_id: string
+          tenant_name: string
+          tenant_signed_at?: string | null
+          tenant_signed_name?: string | null
+          tenant_token?: string
+          user_id?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          document_name?: string
+          final_document_id?: string | null
+          id?: string
+          lease_id?: string
+          owner_name?: string
+          owner_signed_at?: string | null
+          owner_signed_name?: string | null
+          owner_token?: string
+          template_id?: string
+          tenant_name?: string
+          tenant_signed_at?: string | null
+          tenant_signed_name?: string | null
+          tenant_token?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_requests_final_document_id_fkey"
+            columns: ["final_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_requests_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "leases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_requests_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "document_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           address: string | null

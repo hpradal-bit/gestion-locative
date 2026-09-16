@@ -1,7 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const PUBLIC_PATHS = ["/login", "/inscription"];
+// Accessibles sans connexion. /signer reste accessible même connecté — le
+// propriétaire peut signer depuis son propre lien sans être renvoyé à
+// l'accueil (contrairement à /login et /inscription, réservées aux
+// visiteurs non connectés).
+const PUBLIC_PATHS = ["/login", "/inscription", "/signer"];
+const GUEST_ONLY_PATHS = ["/login", "/inscription"];
 
 /**
  * Rafraîchit la session Supabase à chaque requête et protège les routes de
@@ -38,6 +43,9 @@ export async function updateSession(request: NextRequest) {
   const isPublicPath = PUBLIC_PATHS.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );
+  const isGuestOnlyPath = GUEST_ONLY_PATHS.some((path) =>
+    request.nextUrl.pathname.startsWith(path)
+  );
 
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone();
@@ -46,7 +54,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && isPublicPath) {
+  if (user && isGuestOnlyPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     url.search = "";

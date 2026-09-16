@@ -1,10 +1,18 @@
-import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import path from "node:path";
+import { Document, Page, StyleSheet, Text, View, Font } from "@react-pdf/renderer";
+
+import { parseDocumentBlocks, type DocumentBlock } from "@/lib/document-blocks";
 
 const NAVY = "#1c2b45";
 const INK = "#1f2430";
 const MUTED = "#6b7280";
 const LINE = "#d8dce3";
 const PANEL = "#f4f5f7";
+
+Font.register({
+  family: "Caveat",
+  src: path.join(process.cwd(), "public/fonts/Caveat-Regular.ttf"),
+});
 
 const styles = StyleSheet.create({
   page: { paddingTop: 48, paddingBottom: 42, paddingHorizontal: 52, fontSize: 9.2, fontFamily: "Times-Roman", color: INK },
@@ -78,7 +86,24 @@ const styles = StyleSheet.create({
   signatureRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 18, gap: 20 },
   signatureCol: { flex: 1 },
   signatureLabel: { fontSize: 8.5, fontFamily: "Helvetica-Bold", color: NAVY, marginBottom: 6 },
-  signatureBox: { height: 46, borderWidth: 0.7, borderColor: LINE, borderStyle: "solid" },
+  signatureBox: {
+    height: 46,
+    borderWidth: 0.7,
+    borderColor: LINE,
+    borderStyle: "solid",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 6,
+  },
+  signaturePending: { fontSize: 7.5, fontFamily: "Helvetica", color: MUTED },
+  signatureScript: { fontSize: 22, fontFamily: "Caveat", color: NAVY },
+  signatureMeta: {
+    marginTop: 4,
+    fontSize: 7,
+    fontFamily: "Helvetica",
+    color: MUTED,
+    textAlign: "center",
+  },
   smallPrint: {
     marginTop: 14,
     paddingTop: 6,
@@ -102,19 +127,106 @@ const styles = StyleSheet.create({
   },
 });
 
-const ARTICLE_HEADING = /^ARTICLE\s+\d+\s*—/i;
-const DIVIDER_LABEL = /^(Entre les soussignés|Il a été convenu ce qui suit)\s*:?$/i;
-const SOLO_LABEL = /^ET$/;
-const PARTY_LINE = /ci-après dénommé/i;
-const SIGNATURE_LINE = /^Signature du /i;
-const SMALL_PRINT = /^Document généré/i;
+export type SignatureInfo = { name: string; signedAt: string };
 
-export function GeneratedDocument({ title, content }: { title: string; content: string }) {
-  const paragraphs = content.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
-  // Le premier paragraphe reprend en général le titre du contrat en majuscules
-  // (ex. "CONTRAT DE LOCATION D'UN BOX...") : il est déjà affiché comme titre,
-  // pas besoin de le répéter dans le corps du document.
-  const body = paragraphs[0]?.toUpperCase() === paragraphs[0] ? paragraphs.slice(1) : paragraphs;
+type GeneratedDocumentProps = {
+  title: string;
+  content: string;
+  /** Bailleur/Locataire : renseigné une fois le champ signé, sinon la case reste vide et cliquable. */
+  signatures?: { owner?: SignatureInfo; tenant?: SignatureInfo };
+};
+
+function signatureInfoFor(label: string, signatures: GeneratedDocumentProps["signatures"]) {
+  if (!signatures) return undefined;
+  return /bailleur/i.test(label) ? signatures.owner : signatures.tenant;
+}
+
+function renderBlock(block: DocumentBlock, key: string | number, signatures: GeneratedDocumentProps["signatures"]) {
+  switch (block.type) {
+    case "heading":
+      return (
+        <View key={key}>
+          <View style={styles.headingRow}>
+            <View style={styles.headingBullet} />
+            <Text style={styles.heading}>
+              {block.label}
+              {block.rest ? ` — ${block.rest}` : ""}
+            </Text>
+          </View>
+          <View style={styles.headingRule} />
+        </View>
+      );
+    case "divider":
+      return (
+        <View key={key} style={styles.dividerRow}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerLabel}>{block.label}</Text>
+          <View style={styles.dividerLine} />
+        </View>
+      );
+    case "solo":
+      return (
+        <Text key={key} style={styles.soloLabel}>
+          {block.label}
+        </Text>
+      );
+    case "party":
+      return (
+        <View key={key} style={styles.panel}>
+          <Text style={styles.panelText}>{block.text}</Text>
+        </View>
+      );
+    case "signature":
+      return (
+        <View key={key} style={styles.signatureRow}>
+          {block.labels.map((label) => {
+            const info = signatureInfoFor(label, signatures);
+            return (
+              <View key={label} style={styles.signatureCol}>
+                <Text style={styles.signatureLabel}>{label}</Text>
+                <View style={styles.signatureBox}>
+                  {info ? (
+                    <Text style={styles.signatureScript}>{info.name}</Text>
+                  ) : (
+                    <Text style={styles.signaturePending}>En attente de signature</Text>
+                  )}
+                </View>
+                {info && <Text style={styles.signatureMeta}>Signé le {info.signedAt}</Text>}
+              </View>
+            );
+          })}
+        </View>
+      );
+    case "smallprint":
+      return (
+        <Text key={key} style={styles.smallPrint}>
+          {block.text}
+        </Text>
+      );
+    case "paragraph":
+      return (
+        <Text key={key} style={styles.paragraph}>
+          {block.text}
+        </Text>
+      );
+  }
+}
+
+export function GeneratedDocument({ title, content, signatures }: GeneratedDocumentProps) {
+  const blocks = parseDocumentBlocks(content);
+
+  // Un titre d'article ne doit jamais rester seul en bas d'une page : on le
+  // regroupe avec le(s) bloc(s) qui le suivent immédiatement dans un bloc
+  // non sécable (wrap={false}) — soit le groupe entier tient sur la page,
+  // soit il bascule en entier au début de la page suivante.
+  const groups: DocumentBlock[][] = [];
+  for (const block of blocks) {
+    if (block.type === "heading" || groups.length === 0) {
+      groups.push([block]);
+    } else {
+      groups[groups.length - 1].push(block);
+    }
+  }
 
   return (
     <Document title={title}>
@@ -130,79 +242,15 @@ export function GeneratedDocument({ title, content }: { title: string; content: 
           <View style={styles.titleRule} />
         </View>
 
-        {body.map((paragraph, index) => {
-          if (ARTICLE_HEADING.test(paragraph)) {
-            const separatorIndex = paragraph.indexOf("—");
-            const label = separatorIndex === -1 ? paragraph : paragraph.slice(0, separatorIndex).trim();
-            const rest = separatorIndex === -1 ? "" : paragraph.slice(separatorIndex + 1).trim();
-            return (
-              <View key={index}>
-                <View style={styles.headingRow}>
-                  <View style={styles.headingBullet} />
-                  <Text style={styles.heading}>
-                    {label}
-                    {rest ? ` — ${rest}` : ""}
-                  </Text>
-                </View>
-                <View style={styles.headingRule} />
-              </View>
-            );
-          }
-
-          if (DIVIDER_LABEL.test(paragraph)) {
-            return (
-              <View key={index} style={styles.dividerRow}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerLabel}>{paragraph.replace(/:$/, "")}</Text>
-                <View style={styles.dividerLine} />
-              </View>
-            );
-          }
-
-          if (SOLO_LABEL.test(paragraph)) {
-            return (
-              <Text key={index} style={styles.soloLabel}>
-                {paragraph}
-              </Text>
-            );
-          }
-
-          if (PARTY_LINE.test(paragraph)) {
-            return (
-              <View key={index} style={styles.panel}>
-                <Text style={styles.panelText}>{paragraph}</Text>
-              </View>
-            );
-          }
-
-          if (SIGNATURE_LINE.test(paragraph)) {
-            const labels = paragraph.split(/\s{2,}/).filter(Boolean);
-            return (
-              <View key={index} style={styles.signatureRow}>
-                {labels.map((label) => (
-                  <View key={label} style={styles.signatureCol}>
-                    <Text style={styles.signatureLabel}>{label}</Text>
-                    <View style={styles.signatureBox} />
-                  </View>
-                ))}
-              </View>
-            );
-          }
-
-          if (SMALL_PRINT.test(paragraph)) {
-            return (
-              <Text key={index} style={styles.smallPrint}>
-                {paragraph}
-              </Text>
-            );
-          }
-
-          return (
-            <Text key={index} style={styles.paragraph}>
-              {paragraph}
-            </Text>
-          );
-        })}
+        {groups.map((group, groupIndex) =>
+          group.length > 1 || group[0].type === "heading" ? (
+            <View key={groupIndex} wrap={false}>
+              {group.map((block, index) => renderBlock(block, `${groupIndex}-${index}`, signatures))}
+            </View>
+          ) : (
+            renderBlock(group[0], groupIndex, signatures)
+          )
+        )}
 
         <View style={styles.footer} fixed>
           <Text>{title}</Text>

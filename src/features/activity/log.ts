@@ -10,6 +10,7 @@ export const activityActions = [
   "lease_ended",
   "document_added",
   "document_deleted",
+  "document_signed",
   "property_created",
   "property_updated",
   "simulation_created",

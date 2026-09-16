@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { FileOutput, Send, TriangleAlert, CircleCheck } from "lucide-react";
+import { FileOutput, Send, TriangleAlert, CircleCheck, PenLine } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import type { Tables } from "@/lib/supabase/database.types";
 import { sendLeaseDocumentEmail } from "./lease-document-actions";
 import { checkMissingVariables, type MissingVariable } from "./check-missing-variables";
 import { LeaseReviewForm } from "./lease-review-form";
+import { createSignatureRequest } from "@/features/signatures/actions";
 
 type LeaseOption = {
   id: string;
@@ -41,6 +42,7 @@ export function LeaseDocumentGenerator({
   );
   const [leaseId, setLeaseId] = React.useState<string | undefined>(undefined);
   const [isSending, startTransition] = React.useTransition();
+  const [isSendingSignature, startSignatureTransition] = React.useTransition();
   const [missing, setMissing] = React.useState<MissingVariable[] | null>(null);
   const [isChecking, startCheckTransition] = React.useTransition();
   const [checkVersion, setCheckVersion] = React.useState(0);
@@ -180,6 +182,29 @@ export function LeaseDocumentGenerator({
             >
               <Send />
               {isSending ? "Envoi..." : "Envoyer par email"}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={!ready || isSendingSignature}
+              onClick={() => {
+                if (!templateId || !leaseId) return;
+                startSignatureTransition(async () => {
+                  const result = await createSignatureRequest(leaseId, templateId);
+                  if (result.error) {
+                    toast.error(result.error);
+                    return;
+                  }
+                  toast.success("Document envoyé pour signature au locataire", {
+                    action: {
+                      label: "Signer maintenant",
+                      onClick: () => window.open(result.ownerSignUrl, "_blank"),
+                    },
+                  });
+                });
+              }}
+            >
+              <PenLine />
+              {isSendingSignature ? "Envoi..." : "Envoyer pour signature"}
             </Button>
           </div>
         </CardContent>
