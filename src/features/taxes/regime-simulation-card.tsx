@@ -7,6 +7,7 @@ import { formatCurrency } from "@/lib/format";
 import { taxRegimes } from "@/lib/finance";
 import type { PropertyTaxBreakdown } from "./types";
 import { RegimeSquare } from "./regime-square";
+import { NetCashLine } from "./net-cash-line";
 
 /**
  * Comparaison des régimes fiscaux applicables à un bien, avec ses revenus
@@ -72,6 +73,13 @@ export function RegimeSimulationCard({ breakdown }: { breakdown: PropertyTaxBrea
                 </li>
               ))}
             </ol>
+            <div className="mt-3">
+              <NetCashLine
+                grossAnnualRent={breakdown.grossAnnualRent}
+                deductibleExpenses={breakdown.deductibleExpenses}
+                estimate={expanded.estimate}
+              />
+            </div>
           </div>
         )}
       </CardContent>

@@ -8,6 +8,7 @@ import { formatCurrency } from "@/lib/format";
 import { taxRegimes, type TaxRegime } from "@/lib/finance";
 import type { PropertyTaxBreakdown } from "./types";
 import { RegimeSquare } from "./regime-square";
+import { NetCashLine } from "./net-cash-line";
 import { setPropertyTaxRegime } from "./actions";
 
 /**
@@ -89,6 +90,13 @@ export function RegimeSelectorCard({ breakdown }: { breakdown: PropertyTaxBreakd
                 </li>
               ))}
             </ol>
+            <div className="mt-3">
+              <NetCashLine
+                grossAnnualRent={breakdown.grossAnnualRent}
+                deductibleExpenses={breakdown.deductibleExpenses}
+                estimate={selected.estimate}
+              />
+            </div>
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
