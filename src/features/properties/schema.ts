@@ -23,6 +23,23 @@ const optionalMoney = z.preprocess(
   z.coerce.number().min(0, "Le montant doit être positif ou nul").optional()
 );
 
+const customChargeSchema = z.object({
+  label: z.string().trim().min(1, "L'intitulé de la charge est requis."),
+  amount: z.coerce.number().min(0, "Le montant doit être positif ou nul"),
+});
+
+// Saisi comme un unique champ JSON caché (voir property-form.tsx) plutôt
+// que des champs répétés indexés, plus simple à valider et à faire
+// correspondre côté client.
+const customChargesSchema = z.preprocess((value) => {
+  if (typeof value !== "string" || value.trim() === "") return [];
+  try {
+    return JSON.parse(value);
+  } catch {
+    return [];
+  }
+}, z.array(customChargeSchema).default([]));
+
 export const propertyTypes = [
   "appartement",
   "maison",
@@ -80,7 +97,11 @@ export const propertySchema = z.object({
   insurance_annual: money,
   management_fees_annual: money,
   maintenance_annual: money,
-  other_charges_annual: money,
+  // Charges à intitulé libre (ex : "Frais d'expert-comptable") plutôt
+  // qu'un unique montant sans nom — other_charges_annual est déduit de
+  // leur somme dans parsePropertyFormData, pour que le reste de
+  // l'application continue de le lire tel quel.
+  custom_charges: customChargesSchema,
 
   // Fiscalité
   tax_regime: z.preprocess(
@@ -92,11 +113,11 @@ export const propertySchema = z.object({
   annual_amortization: optionalMoney,
 });
 
-export type PropertyInput = z.infer<typeof propertySchema>;
+export type PropertyInput = z.infer<typeof propertySchema> & { other_charges_annual: number };
 
 export function parsePropertyFormData(formData: FormData) {
   const raw = Object.fromEntries(formData.entries());
-  return propertySchema.safeParse({
+  const result = propertySchema.safeParse({
     ...raw,
     has_elevator: formData.get("has_elevator") === "on",
     has_parking: formData.get("has_parking") === "on",
@@ -104,4 +125,17 @@ export function parsePropertyFormData(formData: FormData) {
     has_balcony: formData.get("has_balcony") === "on",
     is_furnished: formData.get("is_furnished") === "on",
   });
+
+  if (!result.success) return result;
+
+  // other_charges_annual n'est plus saisi directement : il est déduit de la
+  // somme des charges à intitulé libre, pour que le reste de l'application
+  // (impôts, rentabilité, tableau de bord) continue de le lire tel quel.
+  return {
+    ...result,
+    data: {
+      ...result.data,
+      other_charges_annual: result.data.custom_charges.reduce((sum, charge) => sum + charge.amount, 0),
+    } satisfies PropertyInput,
+  };
 }

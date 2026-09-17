@@ -43,4 +43,45 @@ describe("parsePropertyFormData", () => {
       expect(result.error.issues[0]?.message).toBe("Le nom du bien est requis.");
     }
   });
+
+  it("déduit other_charges_annual de la somme des charges à intitulé libre", () => {
+    const formData = buildFormData({
+      name: "Appartement Test",
+      custom_charges: JSON.stringify([
+        { label: "Frais d'expert-comptable", amount: 492 },
+        { label: "Cotisation association", amount: 50 },
+      ]),
+    });
+    const result = parsePropertyFormData(formData);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.custom_charges).toEqual([
+        { label: "Frais d'expert-comptable", amount: 492 },
+        { label: "Cotisation association", amount: 50 },
+      ]);
+      expect(result.data.other_charges_annual).toBe(542);
+    }
+  });
+
+  it("traite l'absence de charges personnalisées comme une liste vide", () => {
+    const formData = buildFormData({ name: "Appartement Test" });
+    const result = parsePropertyFormData(formData);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.custom_charges).toEqual([]);
+      expect(result.data.other_charges_annual).toBe(0);
+    }
+  });
+
+  it("rejette une charge personnalisée sans intitulé", () => {
+    const formData = buildFormData({
+      name: "Appartement Test",
+      custom_charges: JSON.stringify([{ label: "", amount: 100 }]),
+    });
+    const result = parsePropertyFormData(formData);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe("L'intitulé de la charge est requis.");
+    }
+  });
 });

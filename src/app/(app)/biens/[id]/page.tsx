@@ -15,6 +15,7 @@ import {
 import { getProperty } from "@/features/properties/queries";
 import { deleteProperty } from "@/features/properties/actions";
 import { PROPERTY_TYPE_LABELS } from "@/features/properties/constants";
+import { parseCustomCharges } from "@/features/properties/custom-charges";
 import type { propertyTypes } from "@/features/properties/schema";
 import {
   calculateCapitalGain,
@@ -206,7 +207,9 @@ export default async function BienDetailPage({
             <InfoRow label="Assurance" value={formatCurrency(property.insurance_annual)} />
             <InfoRow label="Gestion" value={formatCurrency(property.management_fees_annual)} />
             <InfoRow label="Entretien" value={formatCurrency(property.maintenance_annual)} />
-            <InfoRow label="Autres" value={formatCurrency(property.other_charges_annual)} />
+            {parseCustomCharges(property.custom_charges).map((charge, index) => (
+              <InfoRow key={index} label={charge.label} value={formatCurrency(charge.amount)} />
+            ))}
             <InfoRow
               label="Total charges annuelles"
               value={<span className="text-base">{formatCurrency(annualRecurringExpenses)}</span>}

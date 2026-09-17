@@ -413,6 +413,7 @@ export type Database = {
           created_at: string
           current_value: number | null
           current_value_updated_at: string | null
+          custom_charges: Json
           equipment: string | null
           floor: number | null
           furniture_budget: number
@@ -456,6 +457,7 @@ export type Database = {
           created_at?: string
           current_value?: number | null
           current_value_updated_at?: string | null
+          custom_charges?: Json
           equipment?: string | null
           floor?: number | null
           furniture_budget?: number
@@ -499,6 +501,7 @@ export type Database = {
           created_at?: string
           current_value?: number | null
           current_value_updated_at?: string | null
+          custom_charges?: Json
           equipment?: string | null
           floor?: number | null
           furniture_budget?: number

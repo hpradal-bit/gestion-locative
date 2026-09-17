@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useActionState } from "react";
+import { Plus, Trash2 } from "lucide-react";
 
 import { calculateGrossYield, calculateTotalProjectCost } from "@/lib/finance";
 import { formatCurrency, formatPercent } from "@/lib/format";
@@ -27,6 +28,7 @@ import {
 import type { Tables } from "@/lib/supabase/database.types";
 import { PROPERTY_TYPE_LABELS, TAX_REGIME_LABELS } from "./constants";
 import { propertyTypes } from "./schema";
+import { parseCustomCharges, type CustomCharge } from "./custom-charges";
 import { getApplicableTaxRegimes } from "@/lib/finance/tax";
 import type { PropertyActionState } from "./actions";
 
@@ -55,6 +57,9 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
     property?.other_acquisition_fees ?? 0
   );
   const [monthlyRent, setMonthlyRent] = React.useState(property?.monthly_rent ?? 0);
+  const [customCharges, setCustomCharges] = React.useState<CustomCharge[]>(() =>
+    parseCustomCharges(property?.custom_charges)
+  );
   const [propertyType, setPropertyType] = React.useState(property?.property_type ?? "");
   const [taxRegime, setTaxRegime] = React.useState(property?.tax_regime ?? "");
 
@@ -434,13 +439,57 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
               defaultValue={property?.maintenance_annual ?? 0}
             />
           </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="other_charges_annual">Autres charges (annuelles)</Label>
-            <MoneyInput
-              id="other_charges_annual"
-              name="other_charges_annual"
-              defaultValue={property?.other_charges_annual ?? 0}
-            />
+          <div className="flex flex-col gap-2 sm:col-span-2">
+            <Label>Autres charges (annuelles)</Label>
+            <p className="text-xs text-muted-foreground">
+              Ajoutez une ligne par charge, avec l&apos;intitulé de votre choix — par exemple
+              « Frais d&apos;expert-comptable ».
+            </p>
+            {customCharges.map((charge, index) => (
+              <div key={index} className="flex items-start gap-2">
+                <Input
+                  placeholder="Intitulé — ex : Frais d'expert-comptable"
+                  value={charge.label}
+                  onChange={(e) =>
+                    setCustomCharges((prev) =>
+                      prev.map((c, i) => (i === index ? { ...c, label: e.target.value } : c))
+                    )
+                  }
+                  className="flex-1"
+                />
+                <MoneyInput
+                  value={charge.amount}
+                  onChange={(e) =>
+                    setCustomCharges((prev) =>
+                      prev.map((c, i) =>
+                        i === index ? { ...c, amount: Number(e.target.value) || 0 } : c
+                      )
+                    )
+                  }
+                  className="w-36"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Supprimer cette charge"
+                  onClick={() => setCustomCharges((prev) => prev.filter((_, i) => i !== index))}
+                >
+                  <Trash2 />
+                </Button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-fit"
+              onClick={() => setCustomCharges((prev) => [...prev, { label: "", amount: 0 }])}
+            >
+              <Plus />
+              Ajouter une charge
+            </Button>
+            <input type="hidden" name="custom_charges" value={JSON.stringify(customCharges)} />
           </div>
         </CardContent>
       </Card>
