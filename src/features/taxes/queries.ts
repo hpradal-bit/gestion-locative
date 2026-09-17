@@ -54,8 +54,14 @@ export async function getPropertyTaxBreakdowns(): Promise<PropertyTaxBreakdown[]
     }
   }
   const rentByProperty = new Map<string, number>();
+  // Charges locatives (provisions refacturées au locataire selon sa
+  // consommation) : comptées dans le revenu brut déclaré au fisc, mais
+  // reversées ensuite — elles ne restent jamais dans la poche du
+  // propriétaire, donc exclues du calcul « ce qu'il vous reste ».
+  const chargesCollectedByProperty = new Map<string, number>();
   for (const lease of latestLeaseByProperty.values()) {
     rentByProperty.set(lease.property_id, (lease.initial_rent + lease.charges) * 12);
+    chargesCollectedByProperty.set(lease.property_id, lease.charges * 12);
   }
 
   const expensesByProperty = new Map<string, number>();
@@ -96,6 +102,7 @@ export async function getPropertyTaxBreakdowns(): Promise<PropertyTaxBreakdown[]
     const interest = interestByProperty.get(property.id) ?? 0;
     const deductibleExpenses = ownCharges + otherExpenses + interest;
     const grossAnnualRent = rentByProperty.get(property.id) ?? 0;
+    const chargesCollected = chargesCollectedByProperty.get(property.id) ?? 0;
     const amortization = property.annual_amortization ?? 0;
 
     const estimate = property.tax_regime
@@ -131,6 +138,7 @@ export async function getPropertyTaxBreakdowns(): Promise<PropertyTaxBreakdown[]
       propertyType: property.property_type,
       regime: (property.tax_regime as TaxRegime | null) ?? null,
       grossAnnualRent,
+      chargesCollected,
       ownCharges,
       otherExpenses,
       interest,

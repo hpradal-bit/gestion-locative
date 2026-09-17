@@ -5,26 +5,32 @@ import type { TaxEstimate } from "@/lib/finance";
 
 /**
  * Ligne de synthèse finale : ce qu'il reste réellement dans la poche du
- * propriétaire une fois les charges déductibles et l'impôt payés — par an
- * et par mois, sur la même ligne, pour une lecture immédiate.
+ * propriétaire une fois les charges locatives reversées, les charges
+ * déductibles et l'impôt payés — par an et par mois, sur la même ligne.
+ * Les charges locatives (provisions refacturées au locataire selon sa
+ * consommation) sont exclues : elles sont comptées dans le revenu brut
+ * déclaré au fisc, mais reversées ensuite — elles ne restent jamais dans
+ * la poche du propriétaire.
  */
 export function NetCashLine({
   grossAnnualRent,
+  chargesCollected,
   deductibleExpenses,
   estimate,
 }: {
   grossAnnualRent: number;
+  chargesCollected: number;
   deductibleExpenses: number;
   estimate: TaxEstimate;
 }) {
-  const netAnnual = grossAnnualRent - deductibleExpenses - estimate.totalTax;
+  const netAnnual = grossAnnualRent - chargesCollected - deductibleExpenses - estimate.totalTax;
   const netMonthly = netAnnual / 12;
 
   return (
     <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted/30 px-4 py-3">
       <span className="flex items-center gap-2 text-sm font-medium">
         <Wallet className="size-4" />
-        Dans votre poche, après charges et impôt
+        Dans votre poche, hors charges locatives refacturées
       </span>
       <span className="shrink-0 tabular-nums">
         <span className="text-lg font-semibold">{formatCurrency(netAnnual)}</span>

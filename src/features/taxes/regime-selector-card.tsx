@@ -93,6 +93,7 @@ export function RegimeSelectorCard({ breakdown }: { breakdown: PropertyTaxBreakd
             <div className="mt-3">
               <NetCashLine
                 grossAnnualRent={breakdown.grossAnnualRent}
+                chargesCollected={breakdown.chargesCollected}
                 deductibleExpenses={breakdown.deductibleExpenses}
                 estimate={selected.estimate}
               />

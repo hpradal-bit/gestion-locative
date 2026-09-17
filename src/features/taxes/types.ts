@@ -6,6 +6,8 @@ export type PropertyTaxBreakdown = {
   propertyType: string | null;
   regime: TaxRegime | null;
   grossAnnualRent: number;
+  /** Provisions pour charges locatives refacturées au locataire selon sa consommation — jamais un revenu réel. */
+  chargesCollected: number;
   ownCharges: number;
   otherExpenses: number;
   interest: number;
